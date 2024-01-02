@@ -53,6 +53,6 @@ erDiagram
     }
 
     RUN ||--o{ SAMPLE : contains
-    SAMPLE ||--o{ SPECIATION : IS
+    SAMPLE ||--o{ SPECIATION : is
     SAMPLE ||--o{ ANTIBIOGRAM : treated_by
 ```
