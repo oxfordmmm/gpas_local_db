@@ -39,7 +39,7 @@ erDiagram
 
     SPECIATION {
         string(50) guid PK, FK
-        string(20) pipeline PK
+        string(20) assay_system PK
         int species_number PK
         string(50) species
         string(20) sub_species
