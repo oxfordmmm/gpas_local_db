@@ -14,7 +14,7 @@ erDiagram
         text comment
     }
 
-    ISOLATE {
+    SPECIMEN {
         string(50) guid PK
         date collection_date
         string(20) sample_collection_site
@@ -70,7 +70,7 @@ erDiagram
     }
 
     RUN ||--o{ SAMPLE : contains
-    ISOLATE ||--o{ SAMPLE : analysed
+    SPECIMEN ||--o{ SAMPLE : analysed
     SAMPLE ||--o{ SPECIATION : is
     SAMPLE ||--o{ ANTIBIOGRAM : treated_by
     SAMPLE ||--o{ SAMPLE_DETAIL: contains
