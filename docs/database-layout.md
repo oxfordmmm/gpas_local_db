@@ -84,7 +84,7 @@ erDiagram
     KEY_VALUE {
         int analysis_id PK, FK
         string(20) antibiotic PK
-        key_value_type_code result FK
+        string(1) result FK
     }
 
     KEY_VALUE_TYPE {
