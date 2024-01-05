@@ -23,18 +23,18 @@ erDiagram
 
     SPECIMEN {
         int owner_id FK
-        string(50) specimen_id PK
-        date collection_date
+        string(20) accession PK
+        date collection_date PK
         string(3) country_sample_taken "iso 3 letter code"
         string(20) sample_collection_site
-        string(20) sample_type
-        string(20) accession
+        string(20) sample_type 
     }
 
     SAMPLE {
         string(50) run_id FK
-        string(50) specimen_id FK
         string(50) guid PK
+        string(20) accession FK
+        date collection_date FK
         string(20) extraction_method
         string(20) extraction_protocol
         date extraction_date
@@ -53,8 +53,7 @@ erDiagram
 
     SAMPLE_DETAIL {
         string(50) sample_guid PK
-        int sample_replica PK
-        string(20) sample_value_type_code FK
+        string(20) sample_value_type_code PK, FK
         string(50) value_str
         int value_int
         float value_float
