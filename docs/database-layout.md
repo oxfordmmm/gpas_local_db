@@ -1,6 +1,6 @@
 # Database layout
 
-```{.mermaid format=svg}
+```mermaid
 erDiagram
     OWNER {
         int id PK
