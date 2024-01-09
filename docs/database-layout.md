@@ -28,7 +28,7 @@ erDiagram
         string(20) accession "unique with date"
         date collection_date "unique with accession"
         string(3) country_sample_taken "iso 3 letter code"
-        string(20) sample_collection_site
+        string(20) collection_site
         string(20) sample_type 
     }
 
