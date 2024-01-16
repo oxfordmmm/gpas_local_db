@@ -65,7 +65,7 @@ erDiagram
 
     SAMPLE_DETAIL {
         int sample_id FK "unique with sample_value_type_code"
-        string(20) sample_value_type_code FK "unique with sample_id"
+        string(20) sample_detail_type_code FK "unique with sample_id"
         int id PK
         string(50) value_str
         int value_int
@@ -73,7 +73,7 @@ erDiagram
         bool value_bool
     }
 
-    SAMPLE_VALUE_TYPE {
+    SAMPLE_DETAIL_TYPE {
         string(20) code PK
         text description
         enum value_type "either string, int, float or bool"
@@ -124,5 +124,5 @@ erDiagram
     ANALYSIS ||--o{ DRUG_RESISTANCE : "id:analysis_id"
     DRUG_RESISTANCE_RESULT_TYPE ||--o{ DRUG_RESISTANCE : "code:drug_resistance_result_type_code"
     SAMPLE ||--o{ SAMPLE_DETAIL: "id:sample_id"
-    SAMPLE_VALUE_TYPE ||--o{ SAMPLE_DETAIL: "code:sample_value_type_code"
+    SAMPLE_DETAIL_TYPE ||--o{ SAMPLE_DETAIL: "code:sample_detail_type_code"
 ```
