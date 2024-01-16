@@ -29,7 +29,9 @@ erDiagram
         date collection_date "unique with accession"
         string(3) country_sample_taken "iso 3 letter code"
         string(20) collection_site
-        string(20) sample_type 
+        string(20) specimen_type
+        text qr_code
+        text bar_code
     }
 
     SAMPLE {
@@ -41,6 +43,8 @@ erDiagram
         string(20) extraction_protocol
         date extraction_date
         string(5) extraction_user
+        string(20) sequence_type "Isolate or Metagenome"
+        set Nucleic_acid_type "DNA, RNA, cDNA"
         bool phl_amplifaction
         float pre_sequence_concentration
         bool dilution_post_initial_concentration
@@ -48,9 +52,15 @@ erDiagram
         string(50) prep_kit
         string(20) illumina_index
         string(50) ont_barcode
-        int phix_spike_in
         float library_pool_concentration
         text comment
+    }
+
+    SPIKE {
+        int sample_id FK
+        int id PK
+        string(20) name
+        string(20) quantity
     }
 
     SAMPLE_DETAIL {
@@ -79,8 +89,8 @@ erDiagram
         int analysis_id FK "unique with species_number"
         int id PK
         int species_number "unique with analysis_id"
-        string(50) species
-        string(20) sub_species
+        string(100) species
+        string(100) sub_species
         date analysis_date
         json data
     }
@@ -97,13 +107,21 @@ erDiagram
         string(50) description
     }
 
-    RUN ||--o{ SAMPLE : contains
-    OWNER ||--o{ SPECIMEN : owns
-    SPECIMEN ||--o{ SAMPLE : taken_from
-    SAMPLE ||--o{ ANALYSIS : analysed
-    ANALYSIS ||--o{ SPECIATION : is
-    ANALYSIS ||--o{ DRUG_RESISTANCE : treated_by
-    DRUG_RESISTANCE_RESULT_TYPE ||--o{ DRUG_RESISTANCE : is
-    SAMPLE ||--o{ SAMPLE_DETAIL: contains
-    SAMPLE_VALUE_TYPE ||--o{ SAMPLE_DETAIL: is
+    OTHER {
+        int analysis_id FK
+        int id PK
+        string(20) key
+
+    }
+
+    RUN ||--o{ SAMPLE : "id:run_id"
+    OWNER ||--o{ SPECIMEN : "id:owner_id"
+    SPECIMEN ||--o{ SAMPLE : "id:specimen_id"
+    SAMPLE ||--o{ ANALYSIS : "id:sample_id"
+    SAMPLE ||--o{ SPIKE : "id:sample_id"
+    ANALYSIS ||--o{ SPECIATION : "id:analysis_id"
+    ANALYSIS ||--o{ DRUG_RESISTANCE : "id:analysis_id"
+    DRUG_RESISTANCE_RESULT_TYPE ||--o{ DRUG_RESISTANCE : "code:drug_resistance_result_type_code"
+    SAMPLE ||--o{ SAMPLE_DETAIL: "id:sample_id"
+    SAMPLE_VALUE_TYPE ||--o{ SAMPLE_DETAIL: "code:sample_value_type_code"
 ```
