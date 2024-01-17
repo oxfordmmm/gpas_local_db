@@ -1,0 +1,6 @@
+alembic==1.13.1
+iso3166==2.1.1
+PyMySQL==1.1.0
+python-dotenv==1.0.0
+SQLAlchemy==2.0.25
+typing_extensions==4.9.0
