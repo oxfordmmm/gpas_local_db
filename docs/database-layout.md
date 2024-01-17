@@ -110,8 +110,17 @@ erDiagram
     OTHER {
         int analysis_id FK
         int id PK
-        string(20) key
+        string(20) other_type_key
+        string(50) value_str
+        int value_int
+        float value_float
+        bool value_bool
+    }
 
+    OTHER_TYPE {
+        string(20) key
+        text description
+        enum value_type
     }
 
     RUN ||--o{ SAMPLE : "id:run_id"
@@ -121,6 +130,7 @@ erDiagram
     SAMPLE ||--o{ SPIKE : "id:sample_id"
     ANALYSIS ||--o{ SPECIATION : "id:analysis_id"
     ANALYSIS ||--o{ OTHER : "id:analysis_id"
+    OTHER_TYPE ||--o{ OTHER : "key:other_type_key"
     ANALYSIS ||--o{ DRUG_RESISTANCE : "id:analysis_id"
     DRUG_RESISTANCE_RESULT_TYPE ||--o{ DRUG_RESISTANCE : "code:drug_resistance_result_type_code"
     SAMPLE ||--o{ SAMPLE_DETAIL: "id:sample_id"
