@@ -11,7 +11,7 @@ timestamp = Annotated[
     mapped_column(nullable=False, server_default=func.CURRENT_TIMESTAMP()),
 ]
 
-ValueType = Literal['str', 'int', 'float', 'bool']
+ValueType = Literal['str', 'int', 'float', 'bool', 'date', 'text']
 SequenceType = Literal["Isolate", "Metagenome"]
 
 class Owner(Model):
@@ -180,11 +180,13 @@ class SampleDetail(Model):
     
     id: Mapped[int] = mapped_column(primary_key=True)
     sample_id: Mapped[int] = mapped_column(ForeignKey('samples.id'))
-    sample_detail_type_key: Mapped[str] = mapped_column(ForeignKey('sample_detail_types.key'))
+    sample_detail_type_code: Mapped[str] = mapped_column(ForeignKey('sample_detail_types.code'))
     value_str: Mapped[str] = mapped_column(String(50), nullable=True)
     value_int: Mapped[int] = mapped_column(nullable=True)
     value_float: Mapped[float] = mapped_column(nullable=True)
     value_bool: Mapped[bool] = mapped_column(nullable=True)
+    value_date: Mapped[date] = mapped_column(nullable=True)
+    value_text: Mapped[text] = mapped_column(Text, nullable=True)
     
     created_by: Mapped[str] = mapped_column(
         String(50), 
@@ -215,7 +217,7 @@ class SampleDetail(Model):
 class SampleDetailType(Model):
     __tablename__ = 'sample_detail_types'
     
-    key: Mapped[str] = mapped_column(String(20), primary_key=True)
+    code: Mapped[str] = mapped_column(String(50), primary_key=True)
     description: Mapped[text] = mapped_column(Text, nullable=True)
     value_type: Mapped[ValueType] = mapped_column(Enum(
         *get_args(ValueType),
@@ -356,11 +358,13 @@ class Other(Model):
     
     id: Mapped[int] = mapped_column(primary_key=True)
     analysis_id: Mapped[int] = mapped_column(ForeignKey('analyses.id'))
-    other_type_key: Mapped[str] = mapped_column(ForeignKey('other_types.key'))
+    other_type_code: Mapped[str] = mapped_column(ForeignKey('other_types.code'))
     value_str: Mapped[str] = mapped_column(String(50), nullable=True)
     value_int: Mapped[int] = mapped_column(nullable=True)
     value_float: Mapped[float] = mapped_column(nullable=True)
     value_bool: Mapped[bool] = mapped_column(nullable=True)
+    value_date: Mapped[date] = mapped_column(nullable=True)
+    value_text: Mapped[text] = mapped_column(Text, nullable=True)
     
     created_by: Mapped[str] = mapped_column(
         String(50), 
@@ -390,7 +394,7 @@ class Other(Model):
 class OtherType(Model):
     __tablename__ = 'other_types'
     
-    key: Mapped[str] = mapped_column(String(20), primary_key=True)
+    code: Mapped[str] = mapped_column(String(50), primary_key=True)
     description: Mapped[text] = mapped_column(Text, nullable=True)
     value_type: Mapped[ValueType] = mapped_column(Enum(
         *get_args(ValueType),

@@ -30,14 +30,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('code', name=op.f('pk_drug_resistance_result_types'))
     )
     op.create_table('other_types',
-    sa.Column('key', sa.String(length=20), nullable=False),
+    sa.Column('code', sa.String(length=20), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('value_type', sa.Enum('str', 'int', 'float', 'bool', name='value_type', create_constraint=True), nullable=False),
     sa.Column('created_by', sa.String(length=50), server_default=sa.text('(USER())'), nullable=False),
     sa.Column('created_at', mysql.TIMESTAMP(fsp=3), server_default=sa.text('CURRENT_TIMESTAMP(3)'), nullable=False),
     sa.Column('updated_by', sa.String(length=50), server_default=sa.text('(USER())'), nullable=False),
     sa.Column('updated_at', mysql.TIMESTAMP(fsp=3), server_default=sa.text('CURRENT_TIMESTAMP(3)'), nullable=False),
-    sa.PrimaryKeyConstraint('key', name=op.f('pk_other_types'))
+    sa.PrimaryKeyConstraint('code', name=op.f('pk_other_types'))
     )
     op.create_table('owners',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -69,14 +69,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_runs'))
     )
     op.create_table('sample_detail_types',
-    sa.Column('key', sa.String(length=20), nullable=False),
+    sa.Column('code', sa.String(length=50), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('value_type', sa.Enum('str', 'int', 'float', 'bool', name='value_type', create_constraint=True), nullable=False),
     sa.Column('created_by', sa.String(length=50), server_default=sa.text('(USER())'), nullable=False),
     sa.Column('created_at', mysql.TIMESTAMP(fsp=3), server_default=sa.text('CURRENT_TIMESTAMP(3)'), nullable=False),
     sa.Column('updated_by', sa.String(length=50), server_default=sa.text('(USER())'), nullable=False),
     sa.Column('updated_at', mysql.TIMESTAMP(fsp=3), server_default=sa.text('CURRENT_TIMESTAMP(3)'), nullable=False),
-    sa.PrimaryKeyConstraint('key', name=op.f('pk_sample_detail_types'))
+    sa.PrimaryKeyConstraint('code', name=op.f('pk_sample_detail_types'))
     )
     op.create_table('specimens',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -126,7 +126,7 @@ def upgrade() -> None:
     op.create_table('sample_details',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('sample_id', sa.Integer(), nullable=False),
-    sa.Column('sample_detail_type_key', sa.String(length=20), nullable=False),
+    sa.Column('sample_detail_type_code', sa.String(length=20), nullable=False),
     sa.Column('value_str', sa.String(length=50), nullable=True),
     sa.Column('value_int', sa.Integer(), nullable=True),
     sa.Column('value_float', sa.Float(), nullable=True),
@@ -135,7 +135,7 @@ def upgrade() -> None:
     sa.Column('created_at', mysql.TIMESTAMP(fsp=3), server_default=sa.text('CURRENT_TIMESTAMP(3)'), nullable=False),
     sa.Column('updated_by', sa.String(length=50), server_default=sa.text('(USER())'), nullable=False),
     sa.Column('updated_at', mysql.TIMESTAMP(fsp=3), server_default=sa.text('CURRENT_TIMESTAMP(3)'), nullable=False),
-    sa.ForeignKeyConstraint(['sample_detail_type_key'], ['sample_detail_types.key'], name=op.f('fk_sample_details_sample_detail_type_key_sample_detail_types')),
+    sa.ForeignKeyConstraint(['sample_detail_type_code'], ['sample_detail_types.code'], name=op.f('fk_sample_details_sample_detail_type_code_sample_detail_types')),
     sa.ForeignKeyConstraint(['sample_id'], ['samples.id'], name=op.f('fk_sample_details_sample_id_samples')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_sample_details'))
     )
@@ -168,7 +168,7 @@ def upgrade() -> None:
     op.create_table('others',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('analysis_id', sa.Integer(), nullable=False),
-    sa.Column('other_type_key', sa.String(length=20), nullable=False),
+    sa.Column('other_type_code', sa.String(length=20), nullable=False),
     sa.Column('value_str', sa.String(length=50), nullable=True),
     sa.Column('value_int', sa.Integer(), nullable=True),
     sa.Column('value_float', sa.Float(), nullable=True),
@@ -178,7 +178,7 @@ def upgrade() -> None:
     sa.Column('updated_by', sa.String(length=50), server_default=sa.text('(USER())'), nullable=False),
     sa.Column('updated_at', mysql.TIMESTAMP(fsp=3), server_default=sa.text('CURRENT_TIMESTAMP(3)'), nullable=False),
     sa.ForeignKeyConstraint(['analysis_id'], ['analyses.id'], name=op.f('fk_others_analysis_id_analyses')),
-    sa.ForeignKeyConstraint(['other_type_key'], ['other_types.key'], name=op.f('fk_others_other_type_key_other_types')),
+    sa.ForeignKeyConstraint(['other_type_code'], ['other_types.code'], name=op.f('fk_others_other_type_code_other_types')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_others'))
     )
     op.create_table('speciations',
