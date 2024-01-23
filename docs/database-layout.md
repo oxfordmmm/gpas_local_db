@@ -44,7 +44,7 @@ erDiagram
         date extraction_date
         string(5) extraction_user
         string(20) sequence_type "Isolate or Metagenome"
-        set Nucleic_acid_type "DNA, RNA, cDNA"
+        set nucleic_acid_type "DNA, RNA, cDNA"
         bool phl_amplifaction
         float pre_sequence_concentration
         bool dilution_post_initial_concentration
