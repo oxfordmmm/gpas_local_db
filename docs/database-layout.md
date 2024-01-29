@@ -28,9 +28,8 @@ erDiagram
         string(20) accession "unique with date"
         date collection_date "unique with accession"
         string(3) country_sample_taken "iso 3 letter code"
-        string(20) collection_site
         string(20) specimen_type
-        text qr_code
+        text specimen_qr_code
         text bar_code
     }
 
@@ -43,9 +42,9 @@ erDiagram
         string(20) extraction_protocol
         date extraction_date
         string(5) extraction_user
-        string(20) sequence_type "Isolate or Metagenome"
+        string(20) sample_category "culture or uncultured"
         set nucleic_acid_type "DNA, RNA, cDNA"
-        bool phl_amplifaction
+        bool dna_amplifaction
         float pre_sequence_concentration
         bool dilution_post_initial_concentration
         float input_volume
@@ -54,6 +53,18 @@ erDiagram
         string(50) ont_barcode
         float library_pool_concentration
         text comment
+    }
+
+    STORAGE {
+        int id PK
+        int specimen_id FK
+        string(20) accession
+        date specimen_collection_date
+        string(50) freezer_id
+        string(50) freezer_compartment
+        string(50) freezer_sub_compartment
+        text storage_qr_code
+        date sate_into_storage
     }
 
     SPIKE {
@@ -130,6 +141,7 @@ erDiagram
     RUN ||--o{ SAMPLE : "id:run_id"
     OWNER ||--o{ SPECIMEN : "id:owner_id"
     SPECIMEN ||--o{ SAMPLE : "id:specimen_id"
+    SPECIMEN ||--o{ STORAGE : "id:specimen_id"
     SAMPLE ||--o{ ANALYSIS : "id:sample_id"
     SAMPLE ||--o{ SPIKE : "id:sample_id"
     ANALYSIS ||--o{ SPECIATION : "id:analysis_id"

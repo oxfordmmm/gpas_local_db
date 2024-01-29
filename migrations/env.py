@@ -5,8 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from db import Model, engine
-import models # noqa: F401
+from src.gpas.db import Model, engine
+import src.gpas.models as models # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -29,7 +29,6 @@ config.set_main_option("sqlalchemy.url", engine.url.render_as_string(
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.

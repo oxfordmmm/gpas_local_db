@@ -1,20 +1,19 @@
-"""Lookup table data
+"""lookup data
 
-Revision ID: 9fb3e95467c1
-Revises: 00689ba62afa
-Create Date: 2024-01-19 10:22:18.480721
+Revision ID: 8a13068d82dc
+Revises: 9914ba1a02f5
+Create Date: 2024-01-26 11:39:23.759016
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from models import SampleDetailType, OtherType
 
 
 # revision identifiers, used by Alembic.
-revision: str = '9fb3e95467c1'
-down_revision: Union[str, None] = '00689ba62afa'
+revision: str = '8a13068d82dc'
+down_revision: Union[str, None] = '9914ba1a02f5'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -40,8 +39,8 @@ sample_detail_types_data = [
         "value_type": "str",
     },
     {
-        "code": "phl_amplification",
-        "description": "PHL amplification",
+        "code": "dna_amplification",
+        "description": "DNA amplification",
         "value_type": "bool",
     },
     {
@@ -96,7 +95,7 @@ drug_resistance_result_types_data = [
     },
     {
         "code": "U",
-        "description": "Unknown",
+        "description": "Unclassified",
     },
     {
         "code": "F",
