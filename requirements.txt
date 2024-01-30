@@ -9,3 +9,5 @@ defopt==6.4.0
 pydantic==2.5.3
 pandas==2.2.0
 openpyxl==3.1.2
+pyarrow==15.0.0
+errorhandler==2.0.1

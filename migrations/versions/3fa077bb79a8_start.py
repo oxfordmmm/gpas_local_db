@@ -101,7 +101,7 @@ def upgrade() -> None:
     sa.Column('specimen_id', sa.Integer(), nullable=False),
     sa.Column('run_id', sa.Integer(), nullable=False),
     sa.Column('guid', sa.String(length=64), nullable=False),
-    sa.Column('sequence_category', sa.Enum('culture', 'unclutured', name='sequence_category', create_constraint=True), nullable=True),
+    sa.Column('sample_category', sa.Enum('culture', 'unclutured', name='sample_category', create_constraint=True), nullable=True),
     sa.Column('nucleic_acid_type', postgresql.ARRAY(sa.String()), nullable=True),
     sa.Column('created_by', sa.String(length=50), server_default=sa.text('CURRENT_USER'), nullable=False),
     sa.Column('created_at', postgresql.TIMESTAMP(precision=3), server_default=sa.text('NOW()'), nullable=False),
