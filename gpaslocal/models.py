@@ -1,12 +1,12 @@
 from typing import get_args, Optional
 from datetime import datetime, date
 from sqlalchemy import String, ForeignKey, Text, text, UniqueConstraint, Enum, JSON
-from sqlalchemy.orm import relationship, Mapped, mapped_column, WriteOnlyMapped, validates
-from db import Model
+from sqlalchemy.orm import relationship, Mapped, mapped_column, validates
+from gpaslocal.db import Model
 from iso3166 import countries
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
-from constants import ValueType, SampleCategory, NucleicAcidType, db_user, db_timestamp
+from gpaslocal.constants import ValueType, SampleCategory, NucleicAcidType, db_user, db_timestamp
 
 class GpasLocalModel(Model):
     __abstract__ = True
@@ -23,7 +23,7 @@ class Owner(GpasLocalModel):
     site: Mapped[str] = mapped_column(String(50), nullable=False)
     user: Mapped[str] = mapped_column(String(50), nullable=False)
     
-    specimens: Mapped[list['Specimen']] = relationship('Specimen', backref='owner')
+    specimens: Mapped[list['Specimen']] = relationship('Specimen', back_populates='owner')
     
     UniqueConstraint(site, user)
     
@@ -40,8 +40,8 @@ class Specimen(GpasLocalModel):
     specimen_qr_code: Mapped[text] = mapped_column(Text, nullable=True)
     bar_code: Mapped[text] = mapped_column(Text, nullable=True)
     
-    owner: WriteOnlyMapped[Owner] = relationship('Owner', backref='specimens')
-    samples: Mapped[list['Sample']] = relationship('Sample', backref='specimen')
+    owner: Mapped[Owner] = relationship('Owner', back_populates='specimens')
+    samples: Mapped[list['Sample']] = relationship('Sample', back_populates='specimen')
     
     UniqueConstraint(accession, collection_date)
     
@@ -67,7 +67,7 @@ class Run(GpasLocalModel):
     passed_qc: Mapped[bool] = mapped_column(default=False, nullable=True)
     comment: Mapped[text] = mapped_column(Text, nullable=True)
 
-    samples: Mapped[list['Sample']] = relationship('Sample', backref='run')
+    samples: Mapped[list['Sample']] = relationship('Sample', back_populates='run')
 
 
 class Sample(GpasLocalModel):
@@ -77,7 +77,7 @@ class Sample(GpasLocalModel):
     specimen_id: Mapped[int] = mapped_column(ForeignKey('specimens.id'))
     run_id: Mapped[int] = mapped_column(ForeignKey('runs.id'))
     guid: Mapped[str] = mapped_column(String(64), unique=True)
-    SampleCategory: Mapped[SampleCategory] = mapped_column(Enum(
+    sample_category: Mapped[SampleCategory] = mapped_column(Enum(
         *get_args(SampleCategory),
         name='sample_category',
         create_constraint=True,
@@ -85,11 +85,11 @@ class Sample(GpasLocalModel):
     ), nullable=True)
     nucleic_acid_type: Mapped[set[NucleicAcidType]] = mapped_column(MutableList.as_mutable(ARRAY(String)), nullable=True)
 
-    run: WriteOnlyMapped['Run'] = relationship('Run', backref='samples')
-    specimen: WriteOnlyMapped['Specimen'] = relationship('Specimen', backref='samples')
-    details: Mapped[list['SampleDetail']] = relationship('SampleDetail', backref='sample')
-    spikes: Mapped[list['Spike']] = relationship('Spike', backref='sample')
-    analyses: Mapped[list['Analysis']] = relationship('Analysis', backref='sample')
+    run: Mapped['Run'] = relationship('Run', back_populates='samples')
+    specimen: Mapped['Specimen'] = relationship('Specimen', back_populates='samples')
+    details: Mapped[list['SampleDetail']] = relationship('SampleDetail', back_populates='sample')
+    spikes: Mapped[list['Spike']] = relationship('Spike', back_populates='sample')
+    analyses: Mapped[list['Analysis']] = relationship('Analysis', back_populates='sample')
     
     @validates('nucleic_acid_type')
     def validate_nucleic_acid_type(self, key, nucleic_acid_type):
@@ -113,8 +113,8 @@ class SampleDetail(GpasLocalModel):
     value_date: Mapped[date] = mapped_column(nullable=True)
     value_text: Mapped[text] = mapped_column(Text, nullable=True)
 
-    sample: WriteOnlyMapped['Sample'] = relationship('Sample', backref='details')
-    sample_detail_type: WriteOnlyMapped['SampleDetailType'] = relationship('SampleDetailType', backref='details')
+    sample: Mapped['Sample'] = relationship('Sample', back_populates='details')
+    sample_detail_type: Mapped['SampleDetailType'] = relationship('SampleDetailType', back_populates='details')
     
     
 
@@ -130,7 +130,7 @@ class SampleDetailType(GpasLocalModel):
         validate_strings=True
     ))
 
-    details: Mapped[list['SampleDetail']] = relationship('SampleDetail', backref='sample_detail_type')
+    details: Mapped[list['SampleDetail']] = relationship('SampleDetail', back_populates='sample_detail_type')
     
     
 class Spike(GpasLocalModel):
@@ -141,7 +141,7 @@ class Spike(GpasLocalModel):
     name: Mapped[str] = mapped_column(String(20))
     quantity: Mapped[str] = mapped_column(String(20))
 
-    sample: WriteOnlyMapped['Sample'] = relationship('Sample', backref='spikes')
+    sample: Mapped['Sample'] = relationship('Sample', back_populates='spikes')
     
     
 class Analysis(GpasLocalModel):
@@ -151,10 +151,10 @@ class Analysis(GpasLocalModel):
     sample_id: Mapped[int] = mapped_column(ForeignKey('samples.id'))
     assay_system: Mapped[str] = mapped_column(String(20))
 
-    sample: WriteOnlyMapped['Sample'] = relationship('Sample', backref='analyses')
-    speciations: Mapped[list['Speciation']] = relationship('Speciation', backref='analysis')
-    others: Mapped[list['Other']] = relationship('Other', backref='analysis')
-    drug_resistances: Mapped[list['DrugResistance']] = relationship('DrugResistance', backref='analysis')
+    sample: Mapped['Sample'] = relationship('Sample', back_populates='analyses')
+    speciations: Mapped[list['Speciation']] = relationship('Speciation', back_populates='analysis')
+    others: Mapped[list['Other']] = relationship('Other', back_populates='analysis')
+    drug_resistances: Mapped[list['DrugResistance']] = relationship('DrugResistance', back_populates='analysis')
     
     
 class Speciation(GpasLocalModel):
@@ -168,7 +168,7 @@ class Speciation(GpasLocalModel):
     analysis_date: Mapped[date] = mapped_column(default=datetime.utcnow)
     data: Mapped[Optional[dict|list]] = mapped_column(type_=JSON, nullable=True)
     
-    analysis: WriteOnlyMapped['Analysis'] = relationship('Analysis', backref='speciations')
+    analysis: Mapped['Analysis'] = relationship('Analysis', back_populates='speciations')
     
     UniqueConstraint(analysis_id, species_number)
     
@@ -186,8 +186,8 @@ class Other(GpasLocalModel):
     value_date: Mapped[date] = mapped_column(nullable=True)
     value_text: Mapped[text] = mapped_column(Text, nullable=True)
     
-    analysis: WriteOnlyMapped['Analysis'] = relationship('Analysis', backref='others')
-    other_type: WriteOnlyMapped['OtherType'] = relationship('OtherType', backref='others')
+    analysis: Mapped['Analysis'] = relationship('Analysis', back_populates='others')
+    other_type: Mapped['OtherType'] = relationship('OtherType', back_populates='others')
     
 
 class OtherType(GpasLocalModel):
@@ -202,7 +202,7 @@ class OtherType(GpasLocalModel):
         validate_strings=True
     ))
     
-    others: Mapped[list['Other']] = relationship('Other', backref='other_type')
+    others: Mapped[list['Other']] = relationship('Other', back_populates='other_type')
 
 
 class DrugResistance(GpasLocalModel):
@@ -213,8 +213,8 @@ class DrugResistance(GpasLocalModel):
     antibiotic: Mapped[str] = mapped_column(String(20))
     drug_resistance_result_type_code: Mapped[str] = mapped_column(ForeignKey('drug_resistance_result_types.code'))
     
-    analysis: WriteOnlyMapped['Analysis'] = relationship('Analysis', backref='drug_resistances')
-    drug_resistance_result_type: WriteOnlyMapped['DrugResistanceResultType'] = relationship('DrugResistanceResultType', backref='drug_resistances')
+    analysis: Mapped['Analysis'] = relationship('Analysis', back_populates='drug_resistances')
+    drug_resistance_result_type: Mapped['DrugResistanceResultType'] = relationship('DrugResistanceResultType', back_populates='drug_resistances')
     
     UniqueConstraint(analysis_id, antibiotic)
     
@@ -225,4 +225,4 @@ class DrugResistanceResultType(GpasLocalModel):
     code: Mapped[str] = mapped_column(String(1), primary_key=True)
     description: Mapped[text] = mapped_column(Text, nullable=True)
     
-    drug_resistances: Mapped[list['DrugResistance']] = relationship('DrugResistance', backref='drug_resistance_result_type')
+    drug_resistances: Mapped[list['DrugResistance']] = relationship('DrugResistance', back_populates='drug_resistance_result_type')

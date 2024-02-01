@@ -1,5 +1,6 @@
 from typing import Annotated, Literal, Any, TypeVar, Optional
 from math import isnan
+from pandas import isnull
 from datetime import datetime
 from sqlalchemy import String, text
 from sqlalchemy.orm import mapped_column
@@ -34,6 +35,13 @@ def coerce_nan_to_none(x: Any) -> Any:
         return None
     return x
 
+def coerce_nat_to_none(x: Any) -> Any:
+    if isnull(x):
+        return None
+    return x
+
 T = TypeVar('T')
 
 NoneOrNan = Annotated[Optional[T], BeforeValidator(coerce_nan_to_none)]
+ExcelDate = Annotated[T, BeforeValidator(coerce_nat_to_none)]
+OptionalExcelDate = Annotated[Optional[T], BeforeValidator(coerce_nat_to_none)]

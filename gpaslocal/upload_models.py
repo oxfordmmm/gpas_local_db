@@ -1,12 +1,11 @@
-from pydantic import BaseModel, ConfigDict, condate, validator, constr, PositiveInt, conset
+from pydantic import BaseModel, ConfigDict, validator, constr, PositiveInt, conset
 from datetime import date
 from iso3166 import countries
-from constants import SequencingMethod, SampleCategory, NucleicAcidType, NoneOrNan
-
+from gpaslocal.constants import SequencingMethod, SampleCategory, NucleicAcidType, NoneOrNan, ExcelDate, OptionalExcelDate
 
 class RunImport(BaseModel):
     code: constr(strip_whitespace=True, max_length=20)
-    run_date: condate(ge=date(2020, 1, 1))
+    run_date: ExcelDate[date]
     site: constr(strip_whitespace=True, max_length=20)
     sequencing_method: SequencingMethod
     machine: constr(strip_whitespace=True, max_length=20)
@@ -21,7 +20,7 @@ class SpecimensImport(BaseModel):
     owner_site: constr(strip_whitespace=True, max_length=50)
     owner_user: constr(strip_whitespace=True, max_length=50)
     accession: constr(strip_whitespace=True, max_length=20)
-    collection_date: condate(ge=date(2020, 1, 1))
+    collection_date: ExcelDate[date]
     country_sample_taken_code: constr(strip_whitespace=True, min_length=3, max_length=3)
     specimen_type: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
     speciment_qr_code: NoneOrNan[str] = None
@@ -36,12 +35,12 @@ class SpecimensImport(BaseModel):
 class SamplesImport(BaseModel):
     run_code: constr(strip_whitespace=True, max_length=20)
     accession: constr(strip_whitespace=True, max_length=20)
-    collection_date: condate(ge=date(2020, 1, 1))
+    collection_date: ExcelDate[date]
     guid: constr(strip_whitespace=True, max_length=64)
     sample_category: SampleCategory
     nucler_acid_type: NoneOrNan[conset(NucleicAcidType, max_length=3)] = None
     dilution_post_initial_concentration: NoneOrNan[bool] = None
-    extraction_date: NoneOrNan[condate(ge=date(2020, 1, 1))] = None
+    extraction_date: OptionalExcelDate[date] = None
     extraction_method: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
     extraction_protocol: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
     extraction_user: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None

@@ -5,8 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from gpas_local.db import Model, engine
-import gpas_local.models as models # noqa: F401
+from gpaslocal.db import Model, engine
+import gpaslocal.models as models # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

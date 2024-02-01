@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
-from gpas_local import config
+from gpaslocal import config
 
 
 class Model(DeclarativeBase):
