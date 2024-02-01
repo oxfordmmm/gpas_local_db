@@ -1,4 +1,3 @@
-from typing import Type
 import pandas as pd
 import gpaslocal.models as models
 from gpaslocal.db import Session as gpaslocal_session
