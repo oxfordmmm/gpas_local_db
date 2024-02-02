@@ -22,6 +22,7 @@ setup(
         "errorhandler",
         "click",
         "click-log",
+        "progressbar2",
     ],
     extras_require={
         "dev": [

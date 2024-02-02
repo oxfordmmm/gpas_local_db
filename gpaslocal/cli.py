@@ -5,7 +5,6 @@ from gpaslocal import config
 from gpaslocal.importer import import_data
 from gpaslocal.utils import logger
 
-click_log.basic_config(logger)
     
 def verify_configuration():
     missing = [

@@ -1,5 +1,7 @@
 import sys
 import logging
+import click_log
+import progressbar
 
 class ErrorCheckHandler(logging.StreamHandler):
     def __init__(self, *args, **kwargs):
@@ -9,20 +11,24 @@ class ErrorCheckHandler(logging.StreamHandler):
     def emit(self, record):
         if record.levelno == logging.ERROR:
             self.error_occurred = True
-        super().emit(record)
+        # we don't want to emit anything, as that is handle by the click handler,
+        # so do not call super
+        # super().emit(record)
+        
+class CustomLogger(logging.Logger):
+    @property
+    def error_occurred(self):
+        return any(handler.error_occurred for handler in self.handlers if isinstance(handler, ErrorCheckHandler))
 
+# we need to wrap the stderr with the progressbar
+# so that logging is displayed correctly
+progressbar.streams.wrap_stderr()
+
+logging.setLoggerClass(CustomLogger)
 logger = logging.getLogger('gpas-local')
-
-log_format = logging.Formatter('%(levelname)s: %(message)s')
-stream_handler = logging.StreamHandler(stream=sys.stderr)
-stream_handler.setFormatter(log_format)
+click_log.basic_config(logger)
 
 error_check_handler = ErrorCheckHandler(stream=sys.stderr)
-error_check_handler.setFormatter(log_format)
 
-logger.addHandler(stream_handler)
 logger.addHandler(error_check_handler)
 logger.setLevel(logging.INFO)
-
-def error_occurred() -> bool:
-    return error_check_handler.error_occurred

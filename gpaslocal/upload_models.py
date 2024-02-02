@@ -23,7 +23,7 @@ class SpecimensImport(BaseModel):
     collection_date: ExcelDate[date]
     country_sample_taken_code: constr(strip_whitespace=True, min_length=3, max_length=3)
     specimen_type: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
-    speciment_qr_code: NoneOrNan[str] = None
+    specimen_qr_code: NoneOrNan[str] = None
     bar_code: NoneOrNan[str] = None
 
     @validator('country_sample_taken_code')
