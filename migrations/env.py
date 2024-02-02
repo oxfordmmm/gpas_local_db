@@ -1,11 +1,8 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
 
-from gpaslocal.db import Model, engine
+from gpaslocal.db import Model, init_db, dispose_db, get_session
 import gpaslocal.models as models # noqa: F401
 
 # this is the Alembic Config object, which provides
@@ -22,6 +19,10 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Model.metadata
+init_db()
+
+from gpaslocal.db import engine # noqa: E402
+
 config.set_main_option("sqlalchemy.url", engine.url.render_as_string(
     hide_password=False))
 
@@ -61,13 +62,9 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    with get_session() as session:
+        connection = session.connection()
 
-    with connectable.connect() as connection:
         context.configure(
             connection=connection, target_metadata=target_metadata, 
             render_as_batch=True,
@@ -76,8 +73,11 @@ def run_migrations_online() -> None:
         with context.begin_transaction():
             context.run_migrations()
 
-
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+try:
+    if context.is_offline_mode():
+        run_migrations_offline()
+    else:
+        run_migrations_online()
+finally:
+    # Dispose of the engine when migrations are done
+    dispose_db()

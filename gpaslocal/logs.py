@@ -1,6 +1,6 @@
 import sys
+import click_log # type: ignore
 import logging
-import click_log
 import progressbar
 
 class ErrorCheckHandler(logging.StreamHandler):
@@ -17,7 +17,7 @@ class ErrorCheckHandler(logging.StreamHandler):
         
 class CustomLogger(logging.Logger):
     @property
-    def error_occurred(self):
+    def error_occurred(self) -> bool:
         return any(handler.error_occurred for handler in self.handlers if isinstance(handler, ErrorCheckHandler))
 
 # we need to wrap the stderr with the progressbar
@@ -32,3 +32,4 @@ error_check_handler = ErrorCheckHandler(stream=sys.stderr)
 
 logger.addHandler(error_check_handler)
 logger.setLevel(logging.INFO)
+

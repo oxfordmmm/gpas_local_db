@@ -1,6 +1,7 @@
 from pydantic import BaseModel, ConfigDict, validator, constr, PositiveInt, conset
 from datetime import date
 from iso3166 import countries
+import pandas as pd
 from gpaslocal.constants import SequencingMethod, SampleCategory, NucleicAcidType, NoneOrNan, ExcelDate, OptionalExcelDate
 
 class RunImport(BaseModel):
@@ -38,7 +39,7 @@ class SamplesImport(BaseModel):
     collection_date: ExcelDate[date]
     guid: constr(strip_whitespace=True, max_length=64)
     sample_category: SampleCategory
-    nucler_acid_type: NoneOrNan[conset(NucleicAcidType, max_length=3)] = None
+    nucleic_acid_type: NoneOrNan[conset(NucleicAcidType, max_length=3)] = None
     dilution_post_initial_concentration: NoneOrNan[bool] = None
     extraction_date: OptionalExcelDate[date] = None
     extraction_method: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
@@ -54,4 +55,10 @@ class SamplesImport(BaseModel):
     comment: NoneOrNan[str] = None
 
     model_config = ConfigDict(extra='allow')
+    
+    @validator('nucleic_acid_type', pre=True)
+    def split_nucleic_acid_type(cls, v):
+        if pd.notna(v):
+            return set(v.split(','))
+        return v
     

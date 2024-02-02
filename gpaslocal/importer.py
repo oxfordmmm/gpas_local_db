@@ -1,43 +1,49 @@
-import pandas as pd
+import pandas as pd # type: ignore
 import gpaslocal.models as models
-from gpaslocal.db import Session as gpaslocal_session
+from gpaslocal.db import get_session, init_db, dispose_db
 from gpaslocal.upload_models import RunImport, SpecimensImport, SamplesImport
 from pydantic import ValidationError
-from gpaslocal.utils import logger
+from gpaslocal.logs import logger
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import DBAPIError
 from progressbar import ProgressBar
 from datetime import date
 
-
 def import_data(excel_wb: str, dryrun: bool = False) -> bool:
-    
-    logger.info(f"Verifying and uploading data to database from Excel Workbook {excel_wb}")
-    with gpaslocal_session.begin() as session:
-        try:
-            runs(session, excel_wb=excel_wb, dryrun=dryrun)
-            # flush the session to make sure we have the run ids
-            session.flush()
+    try:
+        init_db()
+        
+        logger.info(f"Verifying and uploading data to database from Excel Workbook {excel_wb}")
+        with get_session() as session:
+            try:
+                runs(session, excel_wb=excel_wb, dryrun=dryrun)
+                # flush the session to make sure we have the run ids
+                session.flush()
+                
+                specimens(session, excel_wb=excel_wb, dryrun=dryrun)
+                session.flush()
+                
+                samples(session, excel_wb=excel_wb, dryrun=dryrun)
+                session.flush()
+                
+            except Exception as e:
+                logger.error(f"Failed to upload data: {e}")
+        
+            if logger.error_occurred: # type: ignore
+                session.rollback()
+                logger.error("Upload failed, please see log messages for details")
+                return False
             
-            specimens(session, excel_wb=excel_wb, dryrun=dryrun)
-            session.flush()
-            
-        except Exception as e:
-            logger.error(f"Failed to upload data: {e}")
-    
-    if logger.error_occurred:
-        session.rollback()
-        logger.error("Upload failed, please see log messages for details")
-        return False
-    
-    if dryrun:
-        logger.info("Dry run mode, no data was uploaded")
-        session.rollback()
-    else:
-        logger.info("Data uploaded successfully")
-        session.commit()
-    
-    return True
+            if dryrun:
+                logger.info("Dry run mode, no data was uploaded")
+                session.rollback()
+            else:
+                logger.info("Data uploaded successfully")
+                session.commit()
+        
+        return True
+    finally:
+        dispose_db()
 
 def runs(session: Session, excel_wb: str, dryrun: bool) -> None:
     
@@ -138,25 +144,24 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
         try:
             sample_import = SamplesImport(**row)
             
-            run_id = find_run(session, row['code'])
+            run_id = find_run(session, row['run_code'])
             specimen_id = find_specimen(session, row['accession'], row['collection_date'].date())
             sample_record = models.Sample(
                 specimen_id=specimen_id,
                 run_id=run_id,
                 guid=sample_import.guid,
                 sample_category=sample_import.sample_category,
-                nucleic_acid_type=sample_import.nucler_acid_type,
+                nucleic_acid_type=list(sample_import.nucleic_acid_type),
                 
             )
             existing_sample = session.query(models.Sample).filter(
-                models.Sample.accession == sample_import.accession, 
-                models.Sample.collection_date == sample_import.collection_date
+                models.Sample.guid == sample_import.guid
             ).first()
             if existing_sample:
-                logger.info(f"Samples Sheet Row {index+2}: Sample {row['accession']}, {row['collection_date'].date()} already exists{', updating' if not dryrun else ''}")
+                logger.info(f"Samples Sheet Row {index+2}: Sample {row['guid']} already exists{', updating' if not dryrun else ''}")
                 sample_record.id = existing_sample.id
             else:
-                logger.info(f"Samples Sheet Row {index+2}: Sample {row['accession']}, {row['collection_date'].date()} does not exist{', adding' if not dryrun else ''}")
+                logger.info(f"Samples Sheet Row {index+2}: Sample {row['guid']} does not exist{', adding' if not dryrun else ''}")
             session.merge(sample_record)
         except ValidationError as err:
             for error in err.errors():

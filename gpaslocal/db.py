@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from gpaslocal import config
+from contextlib import contextmanager
 
 
 class Model(DeclarativeBase):
@@ -12,5 +13,25 @@ class Model(DeclarativeBase):
         "pk": "pk_%(table_name)s",
     })
 
-engine = create_engine(config.DATABASE_URL)
-Session = sessionmaker(engine)
+engine = None
+Session = None
+
+def init_db():
+    global engine, Session
+    engine = create_engine(config.DATABASE_URL)
+    Session = sessionmaker(engine)
+
+@contextmanager
+def get_session():
+    session = Session()
+    try:
+        yield session
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+def dispose_db():
+    global engine
+    engine.dispose()

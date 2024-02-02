@@ -1,11 +1,10 @@
 import sys
 import click
-import click_log
+import click_log  # type: ignore
 from gpaslocal import config
 from gpaslocal.importer import import_data
-from gpaslocal.utils import logger
+from gpaslocal.logs import logger
 
-    
 def verify_configuration():
     missing = [
         item for item in config.REQUIRED_KEYS
