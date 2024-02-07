@@ -4,7 +4,15 @@ from iso3166 import countries
 import pandas as pd
 from gpaslocal.constants import SequencingMethod, SampleCategory, NucleicAcidType, NoneOrNan, ExcelDate, OptionalExcelDate
 
-class RunImport(BaseModel):
+
+class ImportModel(BaseModel):
+    def __getitem__(self, item):
+        return self.__dict__[item]
+
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
+
+class RunImport(ImportModel):
     code: constr(strip_whitespace=True, max_length=20)
     run_date: ExcelDate[date]
     site: constr(strip_whitespace=True, max_length=20)
@@ -16,8 +24,7 @@ class RunImport(BaseModel):
     passed_qc: NoneOrNan[bool] = None
     comment: NoneOrNan[str] = None
     
-
-class SpecimensImport(BaseModel):
+class SpecimensImport(ImportModel):
     owner_site: constr(strip_whitespace=True, max_length=50)
     owner_user: constr(strip_whitespace=True, max_length=50)
     accession: constr(strip_whitespace=True, max_length=20)
@@ -33,7 +40,7 @@ class SpecimensImport(BaseModel):
             raise ValueError('Country code "{v}" not recognised')
         return v
 
-class SamplesImport(BaseModel):
+class SamplesImport(ImportModel):
     run_code: constr(strip_whitespace=True, max_length=20)
     accession: constr(strip_whitespace=True, max_length=20)
     collection_date: ExcelDate[date]

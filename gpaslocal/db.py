@@ -30,6 +30,7 @@ def get_session():
         session.rollback()
         raise
     finally:
+        session.commit()
         session.close()
 
 def dispose_db():

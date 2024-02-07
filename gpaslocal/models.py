@@ -7,6 +7,7 @@ from iso3166 import countries
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from gpaslocal.constants import ValueType, SampleCategory, NucleicAcidType, db_user, db_timestamp
+from gpaslocal.upload_models import ImportModel
 
 class GpasLocalModel(Model):
     __abstract__ = True
@@ -15,7 +16,19 @@ class GpasLocalModel(Model):
     created_at: Mapped[db_timestamp]
     updated_by: Mapped[db_user]
     updated_at: Mapped[db_timestamp]
+    
+    def __getitem__(self, item):
+        return getattr(self, item)
 
+    def __setitem__(self, key, value):
+        setattr(self, key, value)
+    
+    def update_from_importmodel(self, importmodel: ImportModel) -> None:
+        for field in importmodel.model_fields:
+            if hasattr(self, field):
+                self[field] = importmodel[field]
+
+    
 class Owner(GpasLocalModel):
     __tablename__ = 'owners'
 
@@ -226,3 +239,4 @@ class DrugResistanceResultType(GpasLocalModel):
     description: Mapped[text] = mapped_column(Text, nullable=True)
     
     drug_resistances: Mapped[list['DrugResistance']] = relationship('DrugResistance', back_populates='drug_resistance_result_type')
+    
