@@ -48,7 +48,7 @@ class Specimen(GpasLocalModel):
     owner_id: Mapped[int] = mapped_column(ForeignKey('owners.id'))
     accession: Mapped[str] = mapped_column(String(20), nullable=False)
     collection_date: Mapped[date] = mapped_column(default=datetime.utcnow, nullable=False)
-    country_sample_taken: Mapped[str] = mapped_column(String(3), nullable=False)
+    country_sample_taken_code: Mapped[str] = mapped_column(String(3), nullable=False)
     specimen_type: Mapped[str] = mapped_column(String(50), nullable=True)
     specimen_qr_code: Mapped[text] = mapped_column(Text, nullable=True)
     bar_code: Mapped[text] = mapped_column(Text, nullable=True)
@@ -58,11 +58,11 @@ class Specimen(GpasLocalModel):
     
     UniqueConstraint(accession, collection_date)
     
-    @validates('country_sample_taken')
-    def validate_country_sample_taken(self, key, country_sample_taken):
-        if country_sample_taken not in countries:
-            raise ValueError(f'Invalid country code: {country_sample_taken}')
-        return country_sample_taken
+    @validates('country_sample_taken_code')
+    def validate_country_sample_taken_code(self, key, country_sample_taken_code):
+        if country_sample_taken_code not in countries:
+            raise ValueError(f'Invalid country code: {country_sample_taken_code}')
+        return country_sample_taken_code
     
 
 class Run(GpasLocalModel):

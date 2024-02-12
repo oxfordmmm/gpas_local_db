@@ -84,7 +84,7 @@ def upgrade() -> None:
     sa.Column('owner_id', sa.Integer(), nullable=False),
     sa.Column('accession', sa.String(length=20), nullable=False),
     sa.Column('collection_date', sa.Date(), nullable=False),
-    sa.Column('country_sample_taken', sa.String(length=3), nullable=False),
+    sa.Column('country_sample_taken_code', sa.String(length=3), nullable=False),
     sa.Column('specimen_type', sa.String(length=50), nullable=True),
     sa.Column('specimen_qr_code', sa.Text(), nullable=True),
     sa.Column('bar_code', sa.Text(), nullable=True),

@@ -1,6 +1,6 @@
 from typing import Annotated, Literal, Any, TypeVar, Optional
 from math import isnan
-from pandas import isnull
+from pandas import isnull # type: ignore
 from datetime import datetime
 from sqlalchemy import String, text
 from sqlalchemy.orm import mapped_column
