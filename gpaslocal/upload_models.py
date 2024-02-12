@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, validator, constr, PositiveInt, conset
 from datetime import date
 from iso3166 import countries
-import pandas as pd
+import pandas as pd # type: ignore
 from gpaslocal.constants import SequencingMethod, SampleCategory, NucleicAcidType, NoneOrNan, ExcelDate, OptionalExcelDate
 
 

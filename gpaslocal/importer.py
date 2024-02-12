@@ -92,15 +92,11 @@ def specimens(session: Session, excel_wb: str, dryrun: bool) -> None:
             if specimen_record:
                 specimen_record.update_from_importmodel(specimen_import)
                 specimen_record.owner = owner_record
-                # have to set country_sample_taken separately as the field names differ
-                specimen_record.country_sample_taken=specimen_import.country_sample_taken_code
                 logger.info(f"Specimens Sheet Row {index+2}: Specimen {row['accession']}, {row['collection_date'].date()} already exists{', updating' if not dryrun else ''}")
             else:
                 specimen_record = models.Specimen()
                 specimen_record.update_from_importmodel(specimen_import)
                 specimen_record.owner = owner_record
-                # have to set country_sample_taken separately as the field names differ
-                specimen_record.country_sample_taken=specimen_import.country_sample_taken_code
                 session.add(specimen_record)
                 logger.info(f"Specimens Sheet Row {index+2}: Specimen {row['accession']}, {row['collection_date'].date()} does not exist{', adding' if not dryrun else ''}")
         except ValidationError as err:
@@ -149,7 +145,7 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
                 sample_record.specimen = specimen_record
                 sample_record.guid = sample_import.guid
                 sample_record.sample_category = sample_import.sample_category
-                sample_record.nucleic_acid_type = list(sample_import.nucleic_acid_type)
+                sample_record.nucleic_acid_type = list(sample_import.nucleic_acid_type) # type: ignore
                 logger.info(f"Samples Sheet Row {index+2}: Sample {row['guid']} already exists{', updating' if not dryrun else ''}")
             else:
                 sample_record = models.Sample()
@@ -157,7 +153,7 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
                 sample_record.specimen = specimen_record
                 sample_record.guid = sample_import.guid
                 sample_record.sample_category = sample_import.sample_category
-                sample_record.nucleic_acid_type = list(sample_import.nucleic_acid_type)
+                sample_record.nucleic_acid_type = list(sample_import.nucleic_acid_type) # type: ignore
                 logger.info(f"Samples Sheet Row {index+2}: Sample {row['guid']} does not exist{', adding' if not dryrun else ''}")
                 session.add(sample_record)
                 
