@@ -1,8 +1,8 @@
-from pydantic import BaseModel, ConfigDict, validator, constr, PositiveInt
+from pydantic import BaseModel, ConfigDict, validator, PositiveInt, Field
 from datetime import date
 from iso3166 import countries
 import pandas as pd # type: ignore
-from typing import List
+from typing import List, Annotated
 from gpaslocal.constants import SequencingMethod, SampleCategory, NucleicAcidType, NoneOrNan, ExcelDate, OptionalExcelDate
 
 
@@ -14,24 +14,24 @@ class ImportModel(BaseModel):
         self.__dict__[key] = value
 
 class RunImport(ImportModel):
-    code: constr(strip_whitespace=True, max_length=20)
+    code: Annotated[str, Field(max_length=20, strip_whitespace=True)]
     run_date: ExcelDate[date]
-    site: constr(strip_whitespace=True, max_length=20)
+    site: Annotated[str, Field(max_length=20, strip_whitespace=True)]
     sequencing_method: SequencingMethod
-    machine: constr(strip_whitespace=True, max_length=20)
-    user: NoneOrNan[constr(strip_whitespace=True, max_length=5)] = None
+    machine: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    user: NoneOrNan[Annotated[str, Field(max_length=5, strip_whitespace=True)]] = None
     number_samples: NoneOrNan[PositiveInt] = None
-    flowcell: NoneOrNan[constr(strip_whitespace=True, max_length=20)] = None
+    flowcell: NoneOrNan[Annotated[str, Field(max_length=20, strip_whitespace=True)]] = None
     passed_qc: NoneOrNan[bool] = None
     comment: NoneOrNan[str] = None
     
 class SpecimensImport(ImportModel):
-    owner_site: constr(strip_whitespace=True, max_length=50)
-    owner_user: constr(strip_whitespace=True, max_length=50)
-    accession: constr(strip_whitespace=True, max_length=20)
+    owner_site: Annotated[str, Field(max_length=50, strip_whitespace=True)]
+    owner_user: Annotated[str, Field(max_length=50, strip_whitespace=True)]
+    accession: Annotated[str, Field(max_length=20, strip_whitespace=True)]
     collection_date: ExcelDate[date]
-    country_sample_taken_code: constr(strip_whitespace=True, min_length=3, max_length=3)
-    specimen_type: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
+    country_sample_taken_code: Annotated[str, Field(max_length=3, min_length=3, strip_whitespace=True)]
+    specimen_type: NoneOrNan[Annotated[str, Field(max_length=50, strip_whitespace=True)]] = None
     specimen_qr_code: NoneOrNan[str] = None
     bar_code: NoneOrNan[str] = None
 
@@ -42,25 +42,24 @@ class SpecimensImport(ImportModel):
         return v
 
 class SamplesImport(ImportModel):
-    run_code: constr(strip_whitespace=True, max_length=20)
-    accession: constr(strip_whitespace=True, max_length=20)
+    run_code: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    accession: Annotated[str, Field(max_length=20, strip_whitespace=True)]
     collection_date: ExcelDate[date]
-    guid: constr(strip_whitespace=True, max_length=64)
+    guid: Annotated[str, Field(max_length=64, strip_whitespace=True)]
     sample_category: SampleCategory
     nucleic_acid_type: NoneOrNan[List[NucleicAcidType]] = None
-    # nucleic_acid_type: NoneOrNan[conset(NucleicAcidType, max_length=3)] = None
     dilution_post_initial_concentration: NoneOrNan[bool] = None
     extraction_date: OptionalExcelDate[date] = None
-    extraction_method: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
-    extraction_protocol: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
-    extraction_user: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
-    illumina_index: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
+    extraction_method: NoneOrNan[Annotated[str, Field(max_length=50, strip_whitespace=True)]] = None
+    extraction_protocol: NoneOrNan[Annotated[str, Field(max_length=50, strip_whitespace=True)]] = None
+    extraction_user: NoneOrNan[Annotated[str, Field(max_length=50, strip_whitespace=True)]] = None
+    illumina_index: NoneOrNan[Annotated[str, Field(max_length=50, strip_whitespace=True)]] = None
     input_volume: NoneOrNan[float] = None
     library_pool_concentration: NoneOrNan[float] = None
-    ont_barcode: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
+    ont_barcode: NoneOrNan[Annotated[str, Field(max_length=50, strip_whitespace=True)]] = None
     dna_amplification: NoneOrNan[bool] = None
     pre_sequence_concentration: NoneOrNan[float] = None
-    prep_kit: NoneOrNan[constr(strip_whitespace=True, max_length=50)] = None
+    prep_kit: NoneOrNan[Annotated[str, Field(max_length=50, strip_whitespace=True)]] = None
     comment: NoneOrNan[str] = None
 
     model_config = ConfigDict(extra='allow')
