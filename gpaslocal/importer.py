@@ -2,12 +2,15 @@ import pandas as pd # type: ignore
 import gpaslocal.models as models
 from gpaslocal.db import get_session, init_db, dispose_db
 from gpaslocal.upload_models import RunImport, SpecimensImport, SamplesImport
+from gpaslocal.constants import SpikeErrors
 from pydantic import ValidationError
 from gpaslocal.logs import logger
 from sqlalchemy.orm import Session
+from sqlalchemy import not_
 from sqlalchemy.exc import DBAPIError
 from progressbar import ProgressBar
 from datetime import date
+import re
 
 def import_data(excel_wb: str, dryrun: bool = False) -> bool:
     try:
@@ -157,6 +160,9 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
             # add the sample detail records
             sample_detail(session, sample_record, sample_import)
             
+            # add the spike records
+            spikes(session, sample_record, sample_import)
+            
         except ValidationError as err:
             for error in err.errors():
                 logger.error(f"Samples Sheet Row {index+2} {error['loc']} : {error['msg']}")
@@ -207,3 +213,45 @@ def sample_detail(session: Session, sample_record: models.Sample, sample_import:
             sample_detail_record['value_'+sample_detail_type.value_type] = value
             session.add(sample_detail_record)
         
+def spikes(session: Session, sample_record: models.Sample, sample_import: SamplesImport) -> None:
+    spike_names: dict = {k: v for k, v in sample_import.dict().items() if k.startswith('spike_name_')}
+    spike_quantities: dict = {k: v for k, v in sample_import.dict().items() if k.startswith('spike_quantity_')}
+    spike_fields = {**spike_names, **spike_quantities}
+    spike_errors = []
+    
+    # Extract the suffixes, convert them to integers
+    suffixes = [int(re.search(r'\d+$', k).group()) for k in spike_fields.keys()]
+    # make sure the suffixes are unique
+    suffixes = list(set(suffixes))
+
+    for i in suffixes:
+        spike_name = getattr(sample_import, f'spike_name_{i}', None)
+        spike_quantity = getattr(sample_import, f'spike_quantity_{i}', None)
+        # check if either the name and quantity is missing then skip
+        if pd.isnull(spike_name) and pd.isnull(spike_quantity):
+            continue
+        # raise an error if just the name is missing
+        if pd.isnull(spike_name):
+            spike_errors.append(f"spike_name_{i} is missing")
+            continue
+        
+        spike_record = session.query(models.Spike).filter(
+            models.Spike.sample == sample_record,
+            models.Spike.name == spike_name
+        ).first()
+        
+        if spike_record:
+            spike_record.quantity = spike_quantity
+        else:
+            spike_record = models.Spike()
+            spike_record.sample = sample_record
+            spike_record.name = spike_name
+            spike_record.quantity = spike_quantity
+            session.add(spike_record)
+
+    # remove any spikes that are not in the spike table for this sample
+    clean_spike_names = [x for x in spike_names.values() if not pd.isnull(x)]
+    session.query(models.Spike).filter(not_(models.Spike.name.in_(clean_spike_names)), models.Spike.sample == sample_record).delete()
+    # raise any errors found
+    if spike_errors:
+        raise SpikeErrors(spike_errors)

@@ -1,6 +1,6 @@
-from typing import Annotated, Literal, Any, TypeVar, Optional
+from typing import Annotated, Literal, Any, TypeVar, Optional, List
 from math import isnan
-from pandas import isnull # type: ignore
+import pandas as pd # type: ignore
 from datetime import datetime
 from sqlalchemy import String, text
 from sqlalchemy.orm import mapped_column
@@ -36,7 +36,7 @@ def coerce_nan_to_none(x: Any) -> Any:
     return x
 
 def coerce_nat_to_none(x: Any) -> Any:
-    if isnull(x):
+    if pd.isnull(x):
         return None
     return x
 
@@ -45,3 +45,8 @@ T = TypeVar('T')
 NoneOrNan = Annotated[Optional[T], BeforeValidator(coerce_nan_to_none)]
 ExcelDate = Annotated[T, BeforeValidator(coerce_nat_to_none)]
 OptionalExcelDate = Annotated[Optional[T], BeforeValidator(coerce_nat_to_none)]
+
+
+class SpikeErrors(Exception):
+    def __init__(self, errors: List):
+        self.errors = errors
