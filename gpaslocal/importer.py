@@ -141,19 +141,15 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
             
             # We have to update the sample record by field here due to the requirement to change the nucleic_acid_type field to a list
             if sample_record:
+                sample_record.update_from_importmodel(sample_import)
                 sample_record.run = run_record
                 sample_record.specimen = specimen_record
-                sample_record.guid = sample_import.guid
-                sample_record.sample_category = sample_import.sample_category
-                sample_record.nucleic_acid_type = list(sample_import.nucleic_acid_type) # type: ignore
                 logger.info(f"Samples Sheet Row {index+2}: Sample {row['guid']} already exists{', updating' if not dryrun else ''}")
             else:
                 sample_record = models.Sample()
+                sample_record.update_from_importmodel(sample_import)
                 sample_record.run = run_record
                 sample_record.specimen = specimen_record
-                sample_record.guid = sample_import.guid
-                sample_record.sample_category = sample_import.sample_category
-                sample_record.nucleic_acid_type = list(sample_import.nucleic_acid_type) # type: ignore
                 logger.info(f"Samples Sheet Row {index+2}: Sample {row['guid']} does not exist{', adding' if not dryrun else ''}")
                 session.add(sample_record)
                 

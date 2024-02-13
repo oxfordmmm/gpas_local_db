@@ -1,4 +1,4 @@
-from typing import get_args, Optional
+from typing import get_args, Optional, List
 from datetime import datetime, date
 from sqlalchemy import String, ForeignKey, Text, text, UniqueConstraint, Enum, JSON
 from sqlalchemy.orm import relationship, Mapped, mapped_column, validates
@@ -6,6 +6,7 @@ from gpaslocal.db import Model
 from iso3166 import countries
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.ext.hybrid import hybrid_property
 from gpaslocal.constants import ValueType, SampleCategory, NucleicAcidType, db_user, db_timestamp
 from gpaslocal.upload_models import ImportModel
 
@@ -50,8 +51,8 @@ class Specimen(GpasLocalModel):
     collection_date: Mapped[date] = mapped_column(default=datetime.utcnow, nullable=False)
     country_sample_taken_code: Mapped[str] = mapped_column(String(3), nullable=False)
     specimen_type: Mapped[str] = mapped_column(String(50), nullable=True)
-    specimen_qr_code: Mapped[text] = mapped_column(Text, nullable=True)
-    bar_code: Mapped[text] = mapped_column(Text, nullable=True)
+    specimen_qr_code: Mapped[Text] = mapped_column(Text, nullable=True)
+    bar_code: Mapped[Text] = mapped_column(Text, nullable=True)
     
     owner: Mapped[Owner] = relationship('Owner', back_populates='specimens')
     samples: Mapped[list['Sample']] = relationship('Sample', back_populates='specimen')
@@ -78,7 +79,7 @@ class Run(GpasLocalModel):
     number_samples: Mapped[int] = mapped_column(default=0, nullable=True)
     flowcell: Mapped[str] = mapped_column(String(20), nullable=True)
     passed_qc: Mapped[bool] = mapped_column(default=False, nullable=True)
-    comment: Mapped[text] = mapped_column(Text, nullable=True)
+    comment: Mapped[Text] = mapped_column(Text, nullable=True)
 
     samples: Mapped[list['Sample']] = relationship('Sample', back_populates='run')
 
@@ -96,7 +97,19 @@ class Sample(GpasLocalModel):
         create_constraint=True,
         validate_strings=True
     ), nullable=True)
-    nucleic_acid_type: Mapped[set[NucleicAcidType]] = mapped_column(MutableList.as_mutable(ARRAY(String)), nullable=True)
+    _nucleic_acid_type: Mapped[List[NucleicAcidType]] = mapped_column(
+        "nucleic_acid_type", 
+        MutableList.as_mutable(ARRAY(String)), 
+        nullable=True
+    )
+    
+    @hybrid_property
+    def nucleic_acid_type(self):
+        return self._nucleic_acid_type
+
+    @nucleic_acid_type.setter
+    def nucleic_acid_type(self, value):
+        self._nucleic_acid_type = value if isinstance(value, list) else list(value)
 
     run: Mapped['Run'] = relationship('Run', back_populates='samples')
     specimen: Mapped['Specimen'] = relationship('Specimen', back_populates='samples')
@@ -124,7 +137,7 @@ class SampleDetail(GpasLocalModel):
     value_float: Mapped[float] = mapped_column(nullable=True)
     value_bool: Mapped[bool] = mapped_column(nullable=True)
     value_date: Mapped[date] = mapped_column(nullable=True)
-    value_text: Mapped[text] = mapped_column(Text, nullable=True)
+    value_text: Mapped[Text] = mapped_column(Text, nullable=True)
 
     sample: Mapped['Sample'] = relationship('Sample', back_populates='details')
     sample_detail_type: Mapped['SampleDetailType'] = relationship('SampleDetailType', back_populates='details')
@@ -197,7 +210,7 @@ class Other(GpasLocalModel):
     value_float: Mapped[float] = mapped_column(nullable=True)
     value_bool: Mapped[bool] = mapped_column(nullable=True)
     value_date: Mapped[date] = mapped_column(nullable=True)
-    value_text: Mapped[text] = mapped_column(Text, nullable=True)
+    value_text: Mapped[Text] = mapped_column(Text, nullable=True)
     
     analysis: Mapped['Analysis'] = relationship('Analysis', back_populates='others')
     other_type: Mapped['OtherType'] = relationship('OtherType', back_populates='others')
@@ -236,7 +249,7 @@ class DrugResistanceResultType(GpasLocalModel):
     __tablename__ = 'drug_resistance_result_types'
     
     code: Mapped[str] = mapped_column(String(1), primary_key=True)
-    description: Mapped[text] = mapped_column(Text, nullable=True)
+    description: Mapped[Text] = mapped_column(Text, nullable=True)
     
     drug_resistances: Mapped[list['DrugResistance']] = relationship('DrugResistance', back_populates='drug_resistance_result_type')
     
