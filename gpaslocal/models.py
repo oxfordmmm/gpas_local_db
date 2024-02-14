@@ -56,6 +56,7 @@ class Specimen(GpasLocalModel):
     
     owner: Mapped[Owner] = relationship('Owner', back_populates='specimens')
     samples: Mapped[list['Sample']] = relationship('Sample', back_populates='specimen')
+    storages: Mapped[list['Storage']] = relationship('Storage', back_populates='specimen')
     
     UniqueConstraint(accession, collection_date)
     
@@ -252,4 +253,18 @@ class DrugResistanceResultType(GpasLocalModel):
     description: Mapped[Text] = mapped_column(Text, nullable=True)
     
     drug_resistances: Mapped[list['DrugResistance']] = relationship('DrugResistance', back_populates='drug_resistance_result_type')
+
+
+class Storage(GpasLocalModel):
+    __tablename__ = 'storages'
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    specimen_id: Mapped[int] = mapped_column(ForeignKey('specimens.id'))
+    freezer_id: Mapped[str] = mapped_column(String(20))
+    freezer_compartment: Mapped[str] = mapped_column(String(20))
+    freezer_sub_compartment: Mapped[str] = mapped_column(String(20))
+    storage_qr_code: Mapped[Text] = mapped_column(Text, nullable=False, unique=True)
+    date_into_storage: Mapped[date] = mapped_column(default=datetime.utcnow, nullable=False)
+    
+    specimen: Mapped['Specimen'] = relationship('Specimen', back_populates='storages')
     

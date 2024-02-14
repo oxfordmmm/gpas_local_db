@@ -75,4 +75,13 @@ class SamplesImport(ImportModel):
                     raise ValueError(f"{value} is not a valid NucleicAcidType value")
             return unique_values
         return v
-    
+
+
+class StoragesImport(ImportModel):
+    accession: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    collection_date: ExcelDate[date]
+    freezer_id: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    freezer_compartment: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    freezer_sub_compartment: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    storage_qr_code: str
+    date_into_storage: ExcelDate[date]
