@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 
 from gpaslocal.db import Model, init_db, dispose_db, get_session
-import gpaslocal.models as models # noqa: F401
+import gpaslocal.models as models  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,15 +21,17 @@ if config.config_file_name is not None:
 target_metadata = Model.metadata
 init_db()
 
-from gpaslocal.db import engine # noqa: E402
+from gpaslocal.db import engine  # noqa: E402
 
-config.set_main_option("sqlalchemy.url", engine.url.render_as_string(
-    hide_password=False))
+config.set_main_option(
+    "sqlalchemy.url", engine.url.render_as_string(hide_password=False)
+)
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -66,12 +68,14 @@ def run_migrations_online() -> None:
         connection = session.connection()
 
         context.configure(
-            connection=connection, target_metadata=target_metadata, 
+            connection=connection,
+            target_metadata=target_metadata,
             render_as_batch=True,
         )
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 try:
     if context.is_offline_mode():

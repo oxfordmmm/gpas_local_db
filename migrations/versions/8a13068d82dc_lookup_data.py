@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '8a13068d82dc'
-down_revision: Union[str, None] = '9914ba1a02f5'
+revision: str = "8a13068d82dc"
+down_revision: Union[str, None] = "9914ba1a02f5"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -106,6 +106,7 @@ drug_resistance_result_types_data = [
         "description": "Not tested",
     },
 ]
+
 
 def upgrade() -> None:
     for row in sample_detail_types_data:
