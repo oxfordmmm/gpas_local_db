@@ -25,6 +25,7 @@ setup(
         "click",
         "click-log",
         "progressbar2",
+        "SQLAlchemy-Continuum",
     ],
     extras_require={
         "dev": [
