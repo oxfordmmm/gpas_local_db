@@ -2,7 +2,6 @@ import pandas as pd # type: ignore
 import gpaslocal.models as models
 from gpaslocal.db import get_session, init_db, dispose_db
 from gpaslocal.upload_models import RunImport, SpecimensImport, SamplesImport
-from gpaslocal.constants import SpikeErrors
 from pydantic import ValidationError
 from gpaslocal.logs import logger
 from sqlalchemy.orm import Session
@@ -161,7 +160,7 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
             sample_detail(session, sample_record, sample_import)
             
             # add the spike records
-            spikes(session, sample_record, sample_import)
+            spikes(session, sample_record, sample_import, index)
             
         except ValidationError as err:
             for error in err.errors():
@@ -213,11 +212,10 @@ def sample_detail(session: Session, sample_record: models.Sample, sample_import:
             sample_detail_record['value_'+sample_detail_type.value_type] = value
             session.add(sample_detail_record)
         
-def spikes(session: Session, sample_record: models.Sample, sample_import: SamplesImport) -> None:
+def spikes(session: Session, sample_record: models.Sample, sample_import: SamplesImport, index: int) -> None:
     spike_names: dict = {k: v for k, v in sample_import.dict().items() if k.startswith('spike_name_')}
     spike_quantities: dict = {k: v for k, v in sample_import.dict().items() if k.startswith('spike_quantity_')}
     spike_fields = {**spike_names, **spike_quantities}
-    spike_errors = []
     
     # Extract the suffixes, convert them to integers
     suffixes = [int(re.search(r'\d+$', k).group()) for k in spike_fields.keys()]
@@ -232,7 +230,7 @@ def spikes(session: Session, sample_record: models.Sample, sample_import: Sample
             continue
         # raise an error if just the name is missing
         if pd.isnull(spike_name):
-            spike_errors.append(f"spike_name_{i} is missing")
+            logger.error(f"Samples Sheet Row {index+2} : spike_name_{i} is missing name")
             continue
         
         spike_record = session.query(models.Spike).filter(
@@ -252,6 +250,3 @@ def spikes(session: Session, sample_record: models.Sample, sample_import: Sample
     # remove any spikes that are not in the spike table for this sample
     clean_spike_names = [x for x in spike_names.values() if not pd.isnull(x)]
     session.query(models.Spike).filter(not_(models.Spike.name.in_(clean_spike_names)), models.Spike.sample == sample_record).delete()
-    # raise any errors found
-    if spike_errors:
-        raise SpikeErrors(spike_errors)

@@ -45,8 +45,3 @@ T = TypeVar('T')
 NoneOrNan = Annotated[Optional[T], BeforeValidator(coerce_nan_to_none)]
 ExcelDate = Annotated[T, BeforeValidator(coerce_nat_to_none)]
 OptionalExcelDate = Annotated[Optional[T], BeforeValidator(coerce_nat_to_none)]
-
-
-class SpikeErrors(Exception):
-    def __init__(self, errors: List):
-        self.errors = errors
