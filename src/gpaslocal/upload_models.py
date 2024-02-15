@@ -3,6 +3,7 @@ from datetime import date
 from iso3166 import countries
 import pandas as pd  # type: ignore
 from typing import List, Annotated
+from constants import ExcelStr
 from gpaslocal.constants import (
     SequencingMethod,
     SampleCategory,
@@ -22,33 +23,33 @@ class ImportModel(BaseModel):
 
 
 class RunImport(ImportModel):
-    code: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    code: Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
     run_date: ExcelDate[date]
-    site: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    site: Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
     sequencing_method: SequencingMethod
-    machine: Annotated[str, Field(max_length=20, strip_whitespace=True)]
-    user: NoneOrNan[Annotated[str, Field(max_length=5, strip_whitespace=True)]] = None
+    machine: Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
+    user: NoneOrNan[Annotated[ExcelStr, Field(max_length=5, strip_whitespace=True)]] = None
     number_samples: NoneOrNan[PositiveInt] = None
     flowcell: NoneOrNan[
-        Annotated[str, Field(max_length=20, strip_whitespace=True)]
+        Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
     ] = None
     passed_qc: NoneOrNan[bool] = None
-    comment: NoneOrNan[str] = None
+    comment: NoneOrNan[ExcelStr] = None
 
 
 class SpecimensImport(ImportModel):
-    owner_site: Annotated[str, Field(max_length=50, strip_whitespace=True)]
-    owner_user: Annotated[str, Field(max_length=50, strip_whitespace=True)]
-    accession: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    owner_site: Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
+    owner_user: Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
+    accession: Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
     collection_date: ExcelDate[date]
     country_sample_taken_code: Annotated[
         str, Field(max_length=3, min_length=3, strip_whitespace=True)
     ]
     specimen_type: NoneOrNan[
-        Annotated[str, Field(max_length=50, strip_whitespace=True)]
+        Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
     ] = None
-    specimen_qr_code: NoneOrNan[str] = None
-    bar_code: NoneOrNan[str] = None
+    specimen_qr_code: NoneOrNan[ExcelStr] = None
+    bar_code: NoneOrNan[ExcelStr] = None
 
     @validator("country_sample_taken_code")
     def validate_country_sample_taken_code(cls, v):
@@ -58,37 +59,37 @@ class SpecimensImport(ImportModel):
 
 
 class SamplesImport(ImportModel):
-    run_code: Annotated[str, Field(max_length=20, strip_whitespace=True)]
-    accession: Annotated[str, Field(max_length=20, strip_whitespace=True)]
+    run_code: Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
+    accession: Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
     collection_date: ExcelDate[date]
-    guid: Annotated[str, Field(max_length=64, strip_whitespace=True)]
+    guid: Annotated[ExcelStr, Field(max_length=64, strip_whitespace=True)]
     sample_category: SampleCategory
     nucleic_acid_type: NoneOrNan[List[NucleicAcidType]] = None
     dilution_post_initial_concentration: NoneOrNan[bool] = None
     extraction_date: OptionalExcelDate[date] = None
     extraction_method: NoneOrNan[
-        Annotated[str, Field(max_length=50, strip_whitespace=True)]
+        Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
     ] = None
     extraction_protocol: NoneOrNan[
-        Annotated[str, Field(max_length=50, strip_whitespace=True)]
+        Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
     ] = None
     extraction_user: NoneOrNan[
-        Annotated[str, Field(max_length=50, strip_whitespace=True)]
+        Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
     ] = None
     illumina_index: NoneOrNan[
-        Annotated[str, Field(max_length=50, strip_whitespace=True)]
+        Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
     ] = None
     input_volume: NoneOrNan[float] = None
     library_pool_concentration: NoneOrNan[float] = None
     ont_barcode: NoneOrNan[
-        Annotated[str, Field(max_length=50, strip_whitespace=True)]
+        Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
     ] = None
     dna_amplification: NoneOrNan[bool] = None
     pre_sequence_concentration: NoneOrNan[float] = None
     prep_kit: NoneOrNan[
-        Annotated[str, Field(max_length=50, strip_whitespace=True)]
+        Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
     ] = None
-    comment: NoneOrNan[str] = None
+    comment: NoneOrNan[ExcelStr] = None
 
     model_config = ConfigDict(extra="allow")
 
@@ -108,8 +109,8 @@ class SamplesImport(ImportModel):
 class StoragesImport(ImportModel):
     accession: Annotated[str, Field(max_length=20, strip_whitespace=True)]
     collection_date: ExcelDate[date]
-    freezer_id: Annotated[str, Field(max_length=20, strip_whitespace=True)]
-    freezer_compartment: Annotated[str, Field(max_length=20, strip_whitespace=True)]
-    freezer_sub_compartment: Annotated[str, Field(max_length=20, strip_whitespace=True)]
-    storage_qr_code: str
+    freezer_id: Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
+    freezer_compartment: Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
+    freezer_sub_compartment: Annotated[ExcelStr, Field(max_length=20, strip_whitespace=True)]
+    storage_qr_code: ExcelStr
     date_into_storage: ExcelDate[date]

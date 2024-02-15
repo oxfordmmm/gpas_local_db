@@ -7,6 +7,7 @@ from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from pydantic import BeforeValidator
 
+
 db_timestamp = Annotated[
     datetime,
     mapped_column(TIMESTAMP(precision=3), server_default=text("NOW()"), nullable=False),
@@ -34,9 +35,13 @@ def coerce_nat_to_none(x: Any) -> Any:
         return None
     return x
 
+def coerce_to_str(x: Any) -> str:
+    return str(x)
+
 
 T = TypeVar("T")
 
 NoneOrNan = Annotated[Optional[T], BeforeValidator(coerce_nan_to_none)]
 ExcelDate = Annotated[T, BeforeValidator(coerce_nat_to_none)]
+ExcelStr = Annotated[str, BeforeValidator(coerce_to_str)]
 OptionalExcelDate = Annotated[Optional[T], BeforeValidator(coerce_nat_to_none)]
