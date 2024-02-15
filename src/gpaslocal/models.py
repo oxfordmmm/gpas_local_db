@@ -1,7 +1,7 @@
 from typing import get_args, Optional, List
 from datetime import datetime, date
 from sqlalchemy import String, ForeignKey, Text, text, UniqueConstraint, Enum, JSON
-from sqlalchemy.orm import relationship, Mapped, mapped_column, validates
+from sqlalchemy.orm import relationship, Mapped, mapped_column, validates, configure_mappers
 from gpaslocal.db import Model
 from iso3166 import countries
 from sqlalchemy.dialects.postgresql import ARRAY
@@ -15,9 +15,12 @@ from gpaslocal.constants import (
     db_timestamp,
 )
 from gpaslocal.upload_models import ImportModel
+from sqlalchemy_continuum import make_versioned
 
+make_versioned(user_cls=None)
 
 class GpasLocalModel(Model):
+    __versioned__ = {}
     __abstract__ = True
 
     created_by: Mapped[db_user]
@@ -38,6 +41,7 @@ class GpasLocalModel(Model):
 
 
 class Owner(GpasLocalModel):
+    __versioned__ = {}  
     __tablename__ = "owners"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -52,6 +56,7 @@ class Owner(GpasLocalModel):
 
 
 class Specimen(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "specimens"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -81,6 +86,7 @@ class Specimen(GpasLocalModel):
 
 
 class Run(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "runs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -99,6 +105,7 @@ class Run(GpasLocalModel):
 
 
 class Sample(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "samples"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -146,6 +153,7 @@ class Sample(GpasLocalModel):
 
 
 class SampleDetail(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "sample_details"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -167,6 +175,7 @@ class SampleDetail(GpasLocalModel):
 
 
 class SampleDetailType(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "sample_detail_types"
 
     code: Mapped[str] = mapped_column(String(50), primary_key=True)
@@ -186,6 +195,7 @@ class SampleDetailType(GpasLocalModel):
 
 
 class Spike(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "spikes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -197,6 +207,7 @@ class Spike(GpasLocalModel):
 
 
 class Analysis(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "analyses"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -214,6 +225,7 @@ class Analysis(GpasLocalModel):
 
 
 class Speciation(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "speciations"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -232,6 +244,7 @@ class Speciation(GpasLocalModel):
 
 
 class Other(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "others"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -249,6 +262,7 @@ class Other(GpasLocalModel):
 
 
 class OtherType(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "other_types"
 
     code: Mapped[str] = mapped_column(String(50), primary_key=True)
@@ -266,6 +280,7 @@ class OtherType(GpasLocalModel):
 
 
 class DrugResistance(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "drug_resistances"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -286,6 +301,7 @@ class DrugResistance(GpasLocalModel):
 
 
 class DrugResistanceResultType(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "drug_resistance_result_types"
 
     code: Mapped[str] = mapped_column(String(1), primary_key=True)
@@ -297,6 +313,7 @@ class DrugResistanceResultType(GpasLocalModel):
 
 
 class Storage(GpasLocalModel):
+    __versioned__ = {}
     __tablename__ = "storages"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -310,3 +327,5 @@ class Storage(GpasLocalModel):
     )
 
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="storages")
+
+configure_mappers()

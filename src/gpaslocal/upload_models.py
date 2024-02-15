@@ -3,7 +3,7 @@ from datetime import date
 from iso3166 import countries
 import pandas as pd  # type: ignore
 from typing import List, Annotated
-from constants import ExcelStr
+from gpaslocal.constants import ExcelStr
 from gpaslocal.constants import (
     SequencingMethod,
     SampleCategory,
