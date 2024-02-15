@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gpaslocal"
+dynamic = ["version"]
+description = "Upload and manage GPAS data locally"
+readme = "README.md"
+requires-python = ">=3.10.0"
+authors = [
+    {name = "Marc Brouard", email = "brouard.marc@gmail.com"},
+]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    "iso3166",
+    "psycopg2-binary",
+    "python-dotenv",
+    "SQLAlchemy",
+    "typing_extensions",
+    "pydantic",
+    "pandas",
+    "openpyxl",
+    "pyarrow",
+    "errorhandler",
+    "click",
+    "click-log",
+    "progressbar2",
+    "SQLAlchemy-Continuum",
+]
+
+[project.scripts]
+    gpaslocal = "gpaslocal.cli:cli"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.2.4",
+    "alembic",
+    "ipython",
+    "mypy",
+    "ruff",
+]
