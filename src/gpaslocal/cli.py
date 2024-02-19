@@ -1,14 +1,15 @@
 import sys
 import click
 import click_log  # type: ignore
-from gpaslocal import config
+from gpaslocal.config import config
 from gpaslocal.importer import import_data
 from gpaslocal.logs import logger
 
 
 def verify_configuration():
-    missing = [item for item in config.REQUIRED_KEYS if not getattr(config, item)]
-    if missing:
+    if missing := [
+        item for item in config.REQUIRED_KEYS if getattr(config, item, None) is None
+    ]:
         click.echo(
             "Error:: Missing configuration keys. "
             "Ensure the following envirionment variables are set: "

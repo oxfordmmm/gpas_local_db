@@ -1,6 +1,6 @@
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, Engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
-from gpaslocal import config
+from gpaslocal.config import config
 from contextlib import contextmanager
 
 
@@ -16,7 +16,7 @@ class Model(DeclarativeBase):
     )
 
 
-engine = None
+engine: Engine = None
 Session = None
 
 

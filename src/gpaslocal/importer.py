@@ -66,17 +66,15 @@ def runs(session: Session, excel_wb: str, dryrun: bool) -> None:
         try:
             run_import = RunImport(**row)
 
-            # check if the run already exists
-            run_record = (
+            if run_record := (
                 session.query(models.Run)
                 .filter(models.Run.code == run_import.code)
                 .first()
-            )
-            if run_record:
+            ):
                 # update the run record
                 run_record.update_from_importmodel(run_import)
                 logger.info(
-                    f"Runs Sheet Row {index+2}: Run {run_import.code} already exists{', updating' if not dryrun else ''}"
+                    f"Runs Sheet Row {index+2}: Run {run_import.code} already exists{'' if dryrun else ', updating'}"
                 )
             else:
                 # add the run record
@@ -84,7 +82,7 @@ def runs(session: Session, excel_wb: str, dryrun: bool) -> None:
                 run_record.update_from_importmodel(run_import)
                 session.add(run_record)
                 logger.info(
-                    f"Runs Sheet Row {index+2}: Run {run_import.code} does not exist{', adding' if not dryrun else ''}"
+                    f"Runs Sheet Row {index+2}: Run {run_import.code} does not exist{'' if dryrun else ', adding'}"
                 )
         except ValidationError as err:
             for error in err.errors():
@@ -106,20 +104,19 @@ def specimens(session: Session, excel_wb: str, dryrun: bool) -> None:
             # get the specimen owner
             owner_record = owner(session, index, row, dryrun)
 
-            # check if we already have a specimen with the same accession and collection date
-            specimen_record = (
+            if specimen_record := (
                 session.query(models.Specimen)
                 .filter(
                     models.Specimen.accession == specimen_import.accession,
-                    models.Specimen.collection_date == specimen_import.collection_date,
+                    models.Specimen.collection_date
+                    == specimen_import.collection_date,
                 )
                 .first()
-            )
-            if specimen_record:
+            ):
                 specimen_record.update_from_importmodel(specimen_import)
                 specimen_record.owner = owner_record
                 logger.info(
-                    f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date} already exists{', updating' if not dryrun else ''}"
+                    f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date} already exists{'' if dryrun else ', updating'}"
                 )
             else:
                 specimen_record = models.Specimen()
@@ -127,7 +124,7 @@ def specimens(session: Session, excel_wb: str, dryrun: bool) -> None:
                 specimen_record.owner = owner_record
                 session.add(specimen_record)
                 logger.info(
-                    f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date} does not exist{', adding' if not dryrun else ''}"
+                    f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date} does not exist{'' if dryrun else ', adding'}"
                 )
         except ValidationError as err:
             for error in err.errors():
@@ -156,7 +153,7 @@ def owner(
             )
             session.add(owner_record)
             logger.info(
-                f"Specimens Sheet Row {index+2}: Owner {specimen_import.owner_site}, {specimen_import.owner_user} does not exist{', adding' if not dryrun else ''}"
+                f"Specimens Sheet Row {index+2}: Owner {specimen_import.owner_site}, {specimen_import.owner_user} does not exist{'' if dryrun else ', adding'}"
             )
     except DBAPIError as err:
         logger.error(f"Specimens Sheet Row {index+2} : {err}")
@@ -189,7 +186,7 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
                 sample_record.run = run_record
                 sample_record.specimen = specimen_record
                 logger.info(
-                    f"Samples Sheet Row {index+2}: Sample {sample_import.guid} already exists{', updating' if not dryrun else ''}"
+                    f"Samples Sheet Row {index+2}: Sample {sample_import.guid} already exists{'' if dryrun else ', updating'}"
                 )
             else:
                 sample_record = models.Sample()
@@ -197,7 +194,7 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
                 sample_record.run = run_record
                 sample_record.specimen = specimen_record
                 logger.info(
-                    f"Samples Sheet Row {index+2}: Sample {sample_import.guid} does not exist{', adding' if not dryrun else ''}"
+                    f"Samples Sheet Row {index+2}: Sample {sample_import.guid} does not exist{'' if dryrun else ', adding'}"
                 )
                 session.add(sample_record)
 
@@ -217,26 +214,30 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
 
 
 def find_run(session: Session, run_code: str) -> models.Run:
-    run = session.query(models.Run).filter(models.Run.code == run_code).first()
-    if not run:
+    if (
+        run := session.query(models.Run)
+        .filter(models.Run.code == run_code)
+        .first()
+    ):
+        return run
+    else:
         raise ValueError(f"Run {run_code} does not exist")
-    return run
 
 
 def find_specimen(
     session: Session, accession: str, collection_date: date
 ) -> models.Specimen:
-    specimen = (
+    if specimen := (
         session.query(models.Specimen)
         .filter(
             models.Specimen.accession == accession,
             models.Specimen.collection_date == collection_date,
         )
         .first()
-    )
-    if not specimen:
+    ):
+        return specimen
+    else:
         raise ValueError(f"Specimen {accession}, {collection_date} does not exist")
-    return specimen
 
 
 def sample_detail(
@@ -285,10 +286,10 @@ def spikes(
     spike_quantities: dict = {
         k: v for k, v in sample_import.dict().items() if k.startswith("spike_quantity_")
     }
-    spike_fields = {**spike_names, **spike_quantities}
+    spike_fields = spike_names | spike_quantities
 
     # Extract the suffixes, convert them to integers
-    suffixes = [int(re.search(r"\d+$", k).group()) for k in spike_fields.keys()]
+    suffixes = [int(re.search(r"\d+$", k).group()) for k in spike_fields]
     # make sure the suffixes are unique
     suffixes = list(set(suffixes))
 
@@ -305,15 +306,14 @@ def spikes(
             )
             continue
 
-        spike_record = (
+        if spike_record := (
             session.query(models.Spike)
             .filter(
-                models.Spike.sample == sample_record, models.Spike.name == spike_name
+                models.Spike.sample == sample_record,
+                models.Spike.name == spike_name,
             )
             .first()
-        )
-
-        if spike_record:
+        ):
             spike_record.quantity = spike_quantity
         else:
             spike_record = models.Spike()
@@ -342,26 +342,25 @@ def storage(session: Session, excel_wb: str, dryrun: bool) -> None:
                 session, storage_import.accession, storage_import.collection_date
             )
 
-            storage_record = (
+            if storage_record := (
                 session.query(models.Storage)
                 .filter(
-                    models.Storage.storage_qr_code == storage_import.storage_qr_code
+                    models.Storage.storage_qr_code
+                    == storage_import.storage_qr_code
                 )
                 .first()
-            )
-
-            if storage_record:
+            ):
                 storage_record.update_from_importmodel(storage_import)
                 storage_record.specimen = specimen_record
                 logger.info(
-                    f"Storage Sheet Row {index+2}: Storage {storage_import.storage_qr_code} already exists{', updating' if not dryrun else ''}"
+                    f"Storage Sheet Row {index+2}: Storage {storage_import.storage_qr_code} already exists{'' if dryrun else ', updating'}"
                 )
             else:
                 storage_record = models.Storage()
                 storage_record.update_from_importmodel(storage_import)
                 storage_record.specimen = specimen_record
                 logger.info(
-                    f"Storage Sheet Row {index+2}: Storage {storage_import.storage_qr_code} does not exist{', adding' if not dryrun else ''}"
+                    f"Storage Sheet Row {index+2}: Storage {storage_import.storage_qr_code} does not exist{'' if dryrun else ', adding'}"
                 )
                 session.add(storage_record)
 

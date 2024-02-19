@@ -1,16 +1,5 @@
-# import sys
-# from pathlib import Path
-
-# # Get the directory containing this script
-# script_dir = Path(__file__).resolve().parent
-
-# # Get the project root directory, which is the parent of the 'migrations' directory
-# project_root_dir = script_dir.parent
-
-# # Add the 'src' directory to the Python path
-# sys.path.append(str(project_root_dir / 'src'))
-
 from logging.config import fileConfig
+from sqlalchemy import Engine
 
 from alembic import context
 
@@ -35,6 +24,8 @@ init_db()
 
 from gpaslocal.db import engine  # noqa: E402
 
+# to keep mypy quiet do an assert
+assert isinstance(engine, Engine)
 config.set_main_option(
     "sqlalchemy.url", engine.url.render_as_string(hide_password=False)
 )
