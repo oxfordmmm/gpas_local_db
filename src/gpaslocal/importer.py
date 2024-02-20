@@ -126,6 +126,9 @@ def specimens(session: Session, excel_wb: str, dryrun: bool) -> None:
                 logger.info(
                     f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date} does not exist{'' if dryrun else ', adding'}"
                 )
+                
+            specimen_detail(session, specimen_record, specimen_import)
+        
         except ValidationError as err:
             for error in err.errors():
                 logger.error(
@@ -159,6 +162,39 @@ def owner(
         logger.error(f"Specimens Sheet Row {index+2} : {err}")
     return owner_record
 
+def specimen_detail(
+    session: Session, specimen_record: models.Specimen, specimen_import: SpecimensImport
+) -> None:
+    # loop through the specimen detail types and add the specimen details
+    specimen_detail_types = session.query(models.SpecimenDetailType).all()
+    for specimen_detail_type in specimen_detail_types:
+        # get the value from the sample_import
+        value = specimen_import[specimen_detail_type.code]
+        # check if the sample detail exists
+        specimen_detail_record = (
+            session.query(models.SpecimenDetail)
+            .filter(
+                models.SpecimenDetail.specimen == specimen_record,
+                models.SpecimenDetail.specimen_detail_type_code == specimen_detail_type.code,
+            )
+            .first()
+        )
+
+        # if the value is None, and the sample detail exists, delete it
+        if value is None:
+            if specimen_detail_record:
+                session.delete(specimen_detail_record)
+            continue
+
+        if specimen_detail_record:
+            specimen_detail_record["value_" + specimen_detail_type.value_type] = value
+        else:
+            specimen_detail_record = models.SpecimenDetail()
+            specimen_detail_record.specimen = specimen_record
+            specimen_detail_record.specimen_detail_type_code = specimen_detail_type.code
+            specimen_detail_record["value_" + specimen_detail_type.value_type] = value
+            session.add(specimen_detail_record)
+
 
 def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
     df = pd.read_excel(excel_wb, sheet_name="Samples")
@@ -180,7 +216,6 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
                 .first()
             )
 
-            # We have to update the sample record by field here due to the requirement to change the nucleic_acid_type field to a list
             if sample_record:
                 sample_record.update_from_importmodel(sample_import)
                 sample_record.run = run_record

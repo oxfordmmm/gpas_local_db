@@ -38,6 +38,16 @@ specimen_detail_types_data = [
         "description": "physical/environmental source of the sample",
         "value_type": "str",
     },
+    {
+        "code": "lat",
+        "description": "geographical coordinates of location where sample was collected",
+        "value_type": "float",
+    },
+    {
+        "code": "lon",
+        "description": "geographical coordinates of location where sample was collected",
+        "value_type": "float",
+    },
 ]
 
 def upgrade() -> None:

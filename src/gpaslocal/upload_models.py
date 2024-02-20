@@ -16,10 +16,11 @@ from gpaslocal.constants import (
 
 class ImportModel(BaseModel):
     def __getitem__(self, item):
-        return self.__dict__[item]
+        return self.__dict__[item] if item in self.__dict__ else None
 
     def __setitem__(self, key, value):
-        self.__dict__[key] = value
+        if key in self.__dict__:
+            self.__dict__[key] = value
 
 
 class RunImport(ImportModel):
@@ -50,6 +51,18 @@ class SpecimensImport(ImportModel):
     ] = None
     specimen_qr_code: NoneOrNan[ExcelStr] = None
     bar_code: NoneOrNan[ExcelStr] = None
+    organism: NoneOrNan[Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]] = None
+    host: NoneOrNan[Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]] = None
+    host_diseases: NoneOrNan[
+        Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
+    ] = None
+    isolation_source: NoneOrNan[
+        Annotated[ExcelStr, Field(max_length=50, strip_whitespace=True)]
+    ] = None
+    lat: NoneOrNan[float] = None
+    lon: NoneOrNan[float] = None
+    
+    model_config = ConfigDict(extra="allow")
 
     @validator("country_sample_taken_code")
     def validate_country_sample_taken_code(cls, v):
