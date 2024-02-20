@@ -3,7 +3,6 @@ from datetime import datetime, date
 from sqlalchemy import String, ForeignKey, Text, text, UniqueConstraint, Enum, JSON
 from sqlalchemy.orm import relationship, Mapped, mapped_column, validates, configure_mappers
 from gpaslocal.db import Model
-from iso3166 import countries
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -15,7 +14,7 @@ from gpaslocal.constants import (
     db_timestamp,
 )
 from gpaslocal.upload_models import ImportModel
-from sqlalchemy_continuum import make_versioned
+from sqlalchemy_continuum import make_versioned # type: ignore
 
 make_versioned(user_cls=None)
 
@@ -65,7 +64,7 @@ class Specimen(GpasLocalModel):
     collection_date: Mapped[date] = mapped_column(
         default=datetime.utcnow, nullable=False
     )
-    country_sample_taken_code: Mapped[str] = mapped_column(String(3), nullable=False)
+    country_sample_taken_code: Mapped[str] = mapped_column(ForeignKey("countries.code"))
     specimen_type: Mapped[str] = mapped_column(String(50), nullable=True)
     specimen_qr_code: Mapped[Text] = mapped_column(Text, nullable=True)
     bar_code: Mapped[Text] = mapped_column(Text, nullable=True)
@@ -75,14 +74,70 @@ class Specimen(GpasLocalModel):
     storages: Mapped[list["Storage"]] = relationship(
         "Storage", back_populates="specimen"
     )
+    country_sample_taken: Mapped["Country"] = relationship(
+        "Country", back_populates="specimens"
+    )
+    details: Mapped[list["SpecimenDetail"]] = relationship(
+        "SpecimenDetail", back_populates="specimen"
+    )
 
     UniqueConstraint(accession, collection_date)
+    
+    
+class SpecimenDetail(GpasLocalModel):
+    __versioned__ = {}
+    __tablename__ = "specimen_details"
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    specimen_id: Mapped[int] = mapped_column(ForeignKey("specimens.id"))
+    specimen_detail_type_code: Mapped[str] = mapped_column(
+        ForeignKey("specimen_detail_types.code")
+    )
+    value_str: Mapped[str] = mapped_column(String(50), nullable=True)
+    value_int: Mapped[int] = mapped_column(nullable=True)
+    value_float: Mapped[float] = mapped_column(nullable=True)
+    value_bool: Mapped[bool] = mapped_column(nullable=True)
+    value_date: Mapped[date] = mapped_column(nullable=True)
+    value_text: Mapped[Text] = mapped_column(Text, nullable=True)
+    
+    specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="details")
+    specimen_detail_type: Mapped["SpecimenDetailType"] = relationship(
+        "SpecimenDetailType", back_populates="details"
+    )
+    
+    
+class SpecimenDetailType(GpasLocalModel):
+    __versioned__ = {}
+    __tablename__ = "specimen_detail_types"
+    
+    code: Mapped[str] = mapped_column(String(50), primary_key=True)
+    description: Mapped[text] = mapped_column(Text, nullable=True)
+    value_type: Mapped[ValueType] = mapped_column(
+        Enum(
+            *get_args(ValueType),
+            name="value_type",
+            create_constraint=True,
+            validate_strings=True,
+        )
+    )
+    
+    details: Mapped[list["SpecimenDetail"]] = relationship(
+        "SpecimenDetail", back_populates="specimen_detail_type"
+    )
 
-    @validates("country_sample_taken_code")
-    def validate_country_sample_taken_code(self, key, country_sample_taken_code):
-        if country_sample_taken_code not in countries:
-            raise ValueError(f"Invalid country code: {country_sample_taken_code}")
-        return country_sample_taken_code
+    
+
+class Country(GpasLocalModel):
+    __versioned__ = {}
+    __tablename__ = "countries"
+
+    code: Mapped[str] = mapped_column(String(3), primary_key=True)
+    code2: Mapped[str] = mapped_column(String(2), nullable=False)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    lat: Mapped[float] = mapped_column(nullable=False)
+    lon: Mapped[float] = mapped_column(nullable=False)
+    
+    specimens: Mapped[list["Specimen"]] = relationship("Specimen", back_populates="country_sample_taken")
 
 
 class Run(GpasLocalModel):
@@ -147,9 +202,8 @@ class Sample(GpasLocalModel):
     def validate_nucleic_acid_type(self, key, nucleic_acid_type):
         if not isinstance(nucleic_acid_type, list):
             raise ValueError("Nucleic acid type must be a list")
-        # remove duplicate values
-        unique_nucleic_acid_type = list(set(nucleic_acid_type))
-        return unique_nucleic_acid_type
+        # make sure only unique nucleic acid types are added
+        return list(set(nucleic_acid_type))
 
 
 class SampleDetail(GpasLocalModel):
