@@ -43,4 +43,5 @@ dev = [
     "ipython",
     "mypy",
     "ruff",
+    "astor",
 ]

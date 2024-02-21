@@ -1,5 +1,6 @@
 import pandas as pd  # type: ignore
 import gpaslocal.models as models
+from gpaslocal import __dbrevision__
 from gpaslocal.db import get_session, init_db, dispose_db
 from gpaslocal.upload_models import (
     RunImport,
@@ -10,12 +11,22 @@ from gpaslocal.upload_models import (
 from pydantic import ValidationError
 from gpaslocal.logs import logger
 from sqlalchemy.orm import Session
-from sqlalchemy import not_
+from sqlalchemy import not_, text
 from sqlalchemy.exc import DBAPIError
 from progressbar import ProgressBar
 from datetime import date
 import re
 
+
+def db_revision_ok(session: Session) -> bool:
+    
+    db_revision: str = session.execute(text("SELECT MAX(version_num) FROM alembic_version")).scalar()
+    if db_revision != __dbrevision__:
+        logger.error(
+            f"Database revision {db_revision} does not match the expected revision {__dbrevision__}"
+        )
+        return False
+    return True 
 
 def import_data(excel_wb: str, dryrun: bool = False) -> bool:
     try:
@@ -26,6 +37,9 @@ def import_data(excel_wb: str, dryrun: bool = False) -> bool:
         )
         with get_session() as session:
             try:
+                if not db_revision_ok(session):
+                    return False
+                
                 runs(session, excel_wb=excel_wb, dryrun=dryrun)
                 session.flush()
 
@@ -140,7 +154,7 @@ def specimens(session: Session, excel_wb: str, dryrun: bool) -> None:
 
 def owner(
     session: Session, index: int, specimen_import: SpecimensImport, dryrun: bool
-) -> models.Owner | None:
+) -> models.Owner:
     try:
         owner_record = (
             session.query(models.Owner)

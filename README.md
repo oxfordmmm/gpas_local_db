@@ -94,3 +94,6 @@ alembic revision --autogenerate -m "message"
 ```
 
 Replacing the message with something suitable. It is important to check the migration that is generated, to make sure it is sensible. Migrations are stored in the `migrations/versions` folder.
+
+Please note when running migrations the `__dbrevision__` variable in `src\gpaslocal\__init__.py` will be updated to the
+new head revision. Please remember to commit this file in addition to your bd migration files.

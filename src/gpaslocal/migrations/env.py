@@ -1,7 +1,10 @@
+import ast
+import astor
 from logging.config import fileConfig
 from sqlalchemy import Engine
 
 from alembic import context
+from alembic.script import ScriptDirectory
 
 from gpaslocal.db import Model, init_db, dispose_db, get_session
 import gpaslocal.models as models  # noqa: F401
@@ -83,6 +86,18 @@ def run_migrations_online() -> None:
         with context.begin_transaction():
             context.run_migrations()
 
+    head_revision = ScriptDirectory.from_config(config).as_revision_number("head")
+    with open("src/gpaslocal/__init__.py", "r") as f:
+        tree = ast.parse(f.read())
+        
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name) and target.id == "__dbrevision__":
+                    node.value = ast.Str(s=head_revision)
+    
+    with open("src/gpaslocal/__init__.py", "w") as f:
+        f.write(astor.to_source(tree))
 
 try:
     if context.is_offline_mode():
