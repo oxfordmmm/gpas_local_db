@@ -20,7 +20,7 @@ import re
 
 def db_revision_ok(session: Session) -> bool:
     
-    db_revision: str = session.execute(text("SELECT MAX(version_num) FROM alembic_version")).scalar()
+    db_revision = session.execute(text("SELECT MAX(version_num) FROM alembic_version")).scalar()
     if db_revision != __dbrevision__:
         logger.error(
             f"Database revision {db_revision} does not match the expected revision {__dbrevision__}"

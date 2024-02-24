@@ -44,4 +44,5 @@ dev = [
     "mypy",
     "ruff",
     "astor",
+    "pytest-postgresql",
 ]
