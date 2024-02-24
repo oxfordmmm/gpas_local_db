@@ -36,7 +36,7 @@ def coerce_nat_to_none(x: Any) -> Any:
     return x
 
 def coerce_to_str(x: Any) -> str:
-    return str(x)
+    return str(x).strip()
 
 
 T = TypeVar("T")
