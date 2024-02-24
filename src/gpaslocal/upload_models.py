@@ -112,7 +112,7 @@ class SamplesImport(ImportModel):
         v = values.get("nucleic_acid_type")
         if pd.notna(v):
             # Convert to set and back to list to remove duplicates
-            unique_values = list(set(value.strip() for value in v.split(",")))
+            unique_values = list({value.strip() for value in v.split(",")})
             # Validate that each value is a valid NucleicAcidType
             for value in unique_values:
                 if value not in NucleicAcidType.__args__:

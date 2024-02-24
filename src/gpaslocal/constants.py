@@ -25,15 +25,11 @@ SequencingMethod = Literal["illumina", "ont", "pacbio"]
 
 
 def coerce_nan_to_none(x: Any) -> Any:
-    if isinstance(x, float) and isnan(x):
-        return None
-    return x
+    return None if isinstance(x, float) and isnan(x) else x
 
 
 def coerce_nat_to_none(x: Any) -> Any:
-    if pd.isnull(x):
-        return None
-    return x
+    return None if pd.isnull(x) else x
 
 def coerce_to_str(x: Any) -> str:
     return str(x).strip()

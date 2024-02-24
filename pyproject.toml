@@ -45,4 +45,5 @@ dev = [
     "ruff",
     "astor",
     "pytest-postgresql",
+    "pytest-cov",
 ]
