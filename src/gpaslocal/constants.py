@@ -31,6 +31,7 @@ def coerce_nan_to_none(x: Any) -> Any:
 def coerce_nat_to_none(x: Any) -> Any:
     return None if pd.isnull(x) else x
 
+
 def coerce_to_str(x: Any) -> str:
     return str(x).strip()
 

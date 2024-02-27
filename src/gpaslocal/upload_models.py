@@ -1,4 +1,11 @@
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator, PositiveInt, Field
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    field_validator,
+    model_validator,
+    PositiveInt,
+    Field,
+)
 from datetime import date
 from iso3166 import countries
 import pandas as pd  # type: ignore
@@ -31,9 +38,7 @@ class RunImport(ImportModel):
     machine: Annotated[ExcelStr, Field(max_length=20)]
     user: NoneOrNan[Annotated[ExcelStr, Field(max_length=5)]] = None
     number_samples: NoneOrNan[PositiveInt] = None
-    flowcell: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=20)]
-    ] = None
+    flowcell: NoneOrNan[Annotated[ExcelStr, Field(max_length=20)]] = None
     passed_qc: NoneOrNan[bool] = None
     comment: NoneOrNan[ExcelStr] = None
 
@@ -43,25 +48,17 @@ class SpecimensImport(ImportModel):
     owner_user: Annotated[ExcelStr, Field(max_length=50)]
     accession: Annotated[ExcelStr, Field(max_length=20)]
     collection_date: ExcelDate[date]
-    country_sample_taken_code: Annotated[
-        str, Field(max_length=3, min_length=3)
-    ]
-    specimen_type: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=50)]
-    ] = None
+    country_sample_taken_code: Annotated[str, Field(max_length=3, min_length=3)]
+    specimen_type: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
     specimen_qr_code: NoneOrNan[ExcelStr] = None
     bar_code: NoneOrNan[ExcelStr] = None
     organism: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
     host: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
-    host_diseases: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=50)]
-    ] = None
-    isolation_source: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=50)]
-    ] = None
+    host_diseases: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
+    isolation_source: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
     lat: NoneOrNan[float] = None
     lon: NoneOrNan[float] = None
-    
+
     model_config = ConfigDict(extra="allow")
 
     @field_validator("country_sample_taken_code")
@@ -80,28 +77,16 @@ class SamplesImport(ImportModel):
     nucleic_acid_type: NoneOrNan[List[NucleicAcidType]] = None
     dilution_post_initial_concentration: NoneOrNan[bool] = None
     extraction_date: OptionalExcelDate[date] = None
-    extraction_method: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=50)]
-    ] = None
-    extraction_protocol: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=50)]
-    ] = None
-    extraction_user: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=50)]
-    ] = None
-    illumina_index: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=50)]
-    ] = None
+    extraction_method: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
+    extraction_protocol: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
+    extraction_user: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
+    illumina_index: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
     input_volume: NoneOrNan[float] = None
     library_pool_concentration: NoneOrNan[float] = None
-    ont_barcode: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=50)]
-    ] = None
+    ont_barcode: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
     dna_amplification: NoneOrNan[bool] = None
     pre_sequence_concentration: NoneOrNan[float] = None
-    prep_kit: NoneOrNan[
-        Annotated[ExcelStr, Field(max_length=50)]
-    ] = None
+    prep_kit: NoneOrNan[Annotated[ExcelStr, Field(max_length=50)]] = None
     comment: NoneOrNan[ExcelStr] = None
 
     model_config = ConfigDict(extra="allow")

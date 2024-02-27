@@ -1,7 +1,13 @@
 from typing import get_args, Optional, List
 from datetime import datetime, date
 from sqlalchemy import String, ForeignKey, Text, text, UniqueConstraint, Enum, JSON
-from sqlalchemy.orm import relationship, Mapped, mapped_column, validates, configure_mappers
+from sqlalchemy.orm import (
+    relationship,
+    Mapped,
+    mapped_column,
+    validates,
+    configure_mappers,
+)
 from gpaslocal.db import Model
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.mutable import MutableList
@@ -14,9 +20,10 @@ from gpaslocal.constants import (
     db_timestamp,
 )
 from gpaslocal.upload_models import ImportModel
-from sqlalchemy_continuum import make_versioned # type: ignore
+from sqlalchemy_continuum import make_versioned  # type: ignore
 
 make_versioned(user_cls=None)
+
 
 class GpasLocalModel(Model):
     __versioned__ = {}
@@ -40,7 +47,7 @@ class GpasLocalModel(Model):
 
 
 class Owner(GpasLocalModel):
-    __versioned__ = {}  
+    __versioned__ = {}
     __tablename__ = "owners"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -82,12 +89,12 @@ class Specimen(GpasLocalModel):
     )
 
     UniqueConstraint(accession, collection_date)
-    
-    
+
+
 class SpecimenDetail(GpasLocalModel):
     __versioned__ = {}
     __tablename__ = "specimen_details"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     specimen_id: Mapped[int] = mapped_column(ForeignKey("specimens.id"))
     specimen_detail_type_code: Mapped[str] = mapped_column(
@@ -99,17 +106,17 @@ class SpecimenDetail(GpasLocalModel):
     value_bool: Mapped[bool] = mapped_column(nullable=True)
     value_date: Mapped[date] = mapped_column(nullable=True)
     value_text: Mapped[Text] = mapped_column(Text, nullable=True)
-    
+
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="details")
     specimen_detail_type: Mapped["SpecimenDetailType"] = relationship(
         "SpecimenDetailType", back_populates="details"
     )
-    
-    
+
+
 class SpecimenDetailType(GpasLocalModel):
     __versioned__ = {}
     __tablename__ = "specimen_detail_types"
-    
+
     code: Mapped[str] = mapped_column(String(50), primary_key=True)
     description: Mapped[text] = mapped_column(Text, nullable=True)
     value_type: Mapped[ValueType] = mapped_column(
@@ -120,12 +127,11 @@ class SpecimenDetailType(GpasLocalModel):
             validate_strings=True,
         )
     )
-    
+
     details: Mapped[list["SpecimenDetail"]] = relationship(
         "SpecimenDetail", back_populates="specimen_detail_type"
     )
 
-    
 
 class Country(GpasLocalModel):
     __versioned__ = {}
@@ -136,8 +142,10 @@ class Country(GpasLocalModel):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     lat: Mapped[float] = mapped_column(nullable=False)
     lon: Mapped[float] = mapped_column(nullable=False)
-    
-    specimens: Mapped[list["Specimen"]] = relationship("Specimen", back_populates="country_sample_taken")
+
+    specimens: Mapped[list["Specimen"]] = relationship(
+        "Specimen", back_populates="country_sample_taken"
+    )
 
 
 class Run(GpasLocalModel):
@@ -381,5 +389,6 @@ class Storage(GpasLocalModel):
     )
 
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="storages")
+
 
 configure_mappers()

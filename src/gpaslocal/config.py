@@ -10,7 +10,7 @@ class Config:
         "DATABASE_PORT",
         "DATABASE_NAME",
     ]
-    
+
     def __init__(self):
         load_dotenv()
 
@@ -23,5 +23,6 @@ class Config:
     @property
     def DATABASE_URL(self):
         return f"postgresql+psycopg2://{self.DATABASE_USER}:{self.DATABASE_PASSWORD}@{self.DATABASE_HOST}:{self.DATABASE_PORT}/{self.DATABASE_NAME}"
+
 
 config = Config()

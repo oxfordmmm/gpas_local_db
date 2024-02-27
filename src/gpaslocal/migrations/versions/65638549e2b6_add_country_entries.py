@@ -13,8 +13,8 @@ import csv
 
 
 # revision identifiers, used by Alembic.
-revision: str = '65638549e2b6'
-down_revision: Union[str, None] = 'ac41a312c0cd'
+revision: str = "65638549e2b6"
+down_revision: Union[str, None] = "ac41a312c0cd"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -28,14 +28,14 @@ def upgrade() -> None:
                 sa.text(
                     "INSERT INTO countries (code, code2, name, lat, lon) VALUES (:code3, :code2, :Name, :Lat, :Lon)"
                 ).bindparams(
-                    code3=row['code3'],
-                    code2=row['code2'],
-                    Name=row['Name'],
-                    Lat=row['Lat'],
-                    Lon=row['Lon']
+                    code3=row["code3"],
+                    code2=row["code2"],
+                    Name=row["Name"],
+                    Lat=row["Lat"],
+                    Lon=row["Lon"],
                 )
             )
-        
+
     # ### end Alembic commands ###
 
 

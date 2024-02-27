@@ -19,14 +19,16 @@ import re
 
 
 def db_revision_ok(session: Session) -> bool:
-    
-    db_revision = session.execute(text("SELECT MAX(version_num) FROM alembic_version")).scalar()
+    db_revision = session.execute(
+        text("SELECT MAX(version_num) FROM alembic_version")
+    ).scalar()
     if db_revision != __dbrevision__:
         logger.error(
             f"Database revision {db_revision} does not match the expected revision {__dbrevision__}"
         )
         return False
-    return True 
+    return True
+
 
 def import_data(excel_wb: str, dryrun: bool = False) -> bool:
     try:
@@ -39,7 +41,7 @@ def import_data(excel_wb: str, dryrun: bool = False) -> bool:
             try:
                 if not db_revision_ok(session):
                     return False
-                
+
                 runs(session, excel_wb=excel_wb, dryrun=dryrun)
                 session.flush()
 
@@ -122,8 +124,7 @@ def specimens(session: Session, excel_wb: str, dryrun: bool) -> None:
                 session.query(models.Specimen)
                 .filter(
                     models.Specimen.accession == specimen_import.accession,
-                    models.Specimen.collection_date
-                    == specimen_import.collection_date,
+                    models.Specimen.collection_date == specimen_import.collection_date,
                 )
                 .first()
             ):
@@ -140,9 +141,9 @@ def specimens(session: Session, excel_wb: str, dryrun: bool) -> None:
                 logger.info(
                     f"Specimens Sheet Row {index+2}: Specimen {specimen_import.accession}, {specimen_import.collection_date} does not exist{'' if dryrun else ', adding'}"
                 )
-                
+
             specimen_detail(session, specimen_record, specimen_import)
-        
+
         except ValidationError as err:
             for error in err.errors():
                 logger.error(
@@ -176,6 +177,7 @@ def owner(
         logger.error(f"Specimens Sheet Row {index+2} : {err}")
     return owner_record
 
+
 def specimen_detail(
     session: Session, specimen_record: models.Specimen, specimen_import: SpecimensImport
 ) -> None:
@@ -189,7 +191,8 @@ def specimen_detail(
             session.query(models.SpecimenDetail)
             .filter(
                 models.SpecimenDetail.specimen == specimen_record,
-                models.SpecimenDetail.specimen_detail_type_code == specimen_detail_type.code,
+                models.SpecimenDetail.specimen_detail_type_code
+                == specimen_detail_type.code,
             )
             .first()
         )
@@ -263,11 +266,7 @@ def samples(session: Session, excel_wb: str, dryrun: bool) -> None:
 
 
 def find_run(session: Session, run_code: str) -> models.Run:
-    if (
-        run := session.query(models.Run)
-        .filter(models.Run.code == run_code)
-        .first()
-    ):
+    if run := session.query(models.Run).filter(models.Run.code == run_code).first():
         return run
     else:
         raise ValueError(f"Run {run_code} does not exist")
@@ -394,8 +393,7 @@ def storage(session: Session, excel_wb: str, dryrun: bool) -> None:
             if storage_record := (
                 session.query(models.Storage)
                 .filter(
-                    models.Storage.storage_qr_code
-                    == storage_import.storage_qr_code
+                    models.Storage.storage_qr_code == storage_import.storage_qr_code
                 )
                 .first()
             ):
