@@ -42,4 +42,4 @@ jobs:
           mypy src/gpaslocal
       - name: Tests
         run: |
-          pytest -k docker --postgresql-host=localhost --postgresql-port=5432 --postgresql-password=postgres src/gpaslocal
+          pytest docker --postgresql-host=localhost --postgresql-port=5432 --postgresql-password=postgres src/gpaslocal
