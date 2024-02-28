@@ -19,7 +19,7 @@ jobs:
         pip install -r src/gpaslocal/requirements.txt
     - name: Extract version from tag
       id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      run: echo "VERSION=${{ github.ref }}" >> $GITHUB_ENV
     - name: Build Executable
       run: pyinstaller --onefile --name gpaslocal-${{ env.VERSION }}-${{ runner.os }} src/gpaslocal/cli.py
     - name: Upload Executable to Release
