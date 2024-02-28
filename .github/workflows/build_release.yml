@@ -20,6 +20,8 @@ jobs:
     - name: Extract version from tag
       id: get_version
       run: echo "VERSION=${{ github.ref }}".replace('refs/tags/', '') >> $GITHUB_ENV
+    - name: Echo Version
+      run: echo ${{ env.VERSION }}
     - name: Build Executable
       run: pyinstaller --onefile --name gpaslocal-${{ env.VERSION }}-${{ runner.os }} src/gpaslocal/cli.py
     - name: Upload Executable to Release
