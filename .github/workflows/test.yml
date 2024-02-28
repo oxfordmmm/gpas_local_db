@@ -29,7 +29,7 @@ jobs:
       - name: Install PostgreSQL 16
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-16
+          sudo apt-get install -y postgresql
           sudo service postgresql start
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
