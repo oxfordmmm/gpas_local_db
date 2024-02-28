@@ -6,13 +6,22 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        include:
+          - os: macos-latest
+            arch: arm64
+          - os: macos-latest
+            arch: x64
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
+        architecture: ${{ matrix.arch }}
     - name: Install Dependencies
       run: |
         pip install pyinstaller
@@ -22,13 +31,13 @@ jobs:
       run: echo "RELEASE_VERSION=$(echo ${{ github.ref }} | Out-String -Stream | %{ $_ -replace 'refs/tags/', '' })" >> $env:GITHUB_ENV
       shell: pwsh
     - name: Build Executable
-      run: pyinstaller --onefile --name gpaslocal-${{ env.RELEASE_VERSION }}-${{ runner.os }} src/gpaslocal/cli.py
+      run: pyinstaller --onefile --name gpaslocal-${{ env.RELEASE_VERSION }}-${{ runner.os }}-${{ matrix.arch }} src/gpaslocal/cli.py
     - name: Upload Executable to Release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./dist/gpaslocal-${{ env.RELEASE_VERSION }}-${{ runner.os }}.exe
-        asset_name: gpaslocal-${{ env.RELEASE_VERSION }}-${{ runner.os }}.exe
+        asset_path: ./dist/gpaslocal-${{ env.RELEASE_VERSION }}-${{ runner.os }}-${{ matrix.arch }}.exe
+        asset_name: gpaslocal-${{ env.RELEASE_VERSION }}-${{ runner.os }}-${{ matrix.arch }}.exe
         asset_content_type: application/octet-stream
