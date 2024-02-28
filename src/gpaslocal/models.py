@@ -1,6 +1,6 @@
-from typing import get_args, Optional, List
+from typing import get_args, Optional, List, Dict
 from datetime import datetime, date
-from sqlalchemy import String, ForeignKey, Text, text, UniqueConstraint, Enum, JSON
+from sqlalchemy import String, ForeignKey, Text, UniqueConstraint, Enum, JSON
 from sqlalchemy.orm import (
     relationship,
     Mapped,
@@ -26,7 +26,6 @@ make_versioned(user_cls=None)
 
 
 class GpasLocalModel(Model):
-    __versioned__ = {}
     __abstract__ = True
 
     created_by: Mapped[db_user]
@@ -47,7 +46,7 @@ class GpasLocalModel(Model):
 
 
 class Owner(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "owners"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -62,7 +61,7 @@ class Owner(GpasLocalModel):
 
 
 class Specimen(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "specimens"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -92,7 +91,7 @@ class Specimen(GpasLocalModel):
 
 
 class SpecimenDetail(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "specimen_details"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -114,11 +113,11 @@ class SpecimenDetail(GpasLocalModel):
 
 
 class SpecimenDetailType(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "specimen_detail_types"
 
     code: Mapped[str] = mapped_column(String(50), primary_key=True)
-    description: Mapped[text] = mapped_column(Text, nullable=True)
+    description: Mapped[Text] = mapped_column(Text, nullable=True)
     value_type: Mapped[ValueType] = mapped_column(
         Enum(
             *get_args(ValueType),
@@ -134,7 +133,7 @@ class SpecimenDetailType(GpasLocalModel):
 
 
 class Country(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "countries"
 
     code: Mapped[str] = mapped_column(String(3), primary_key=True)
@@ -149,7 +148,7 @@ class Country(GpasLocalModel):
 
 
 class Run(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "runs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -168,7 +167,7 @@ class Run(GpasLocalModel):
 
 
 class Sample(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "samples"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -192,7 +191,7 @@ class Sample(GpasLocalModel):
     def nucleic_acid_type(self):
         return self._nucleic_acid_type
 
-    @nucleic_acid_type.setter
+    @nucleic_acid_type.setter  # type: ignore
     def nucleic_acid_type(self, value):
         self._nucleic_acid_type = value if isinstance(value, list) else list(value)
 
@@ -215,7 +214,7 @@ class Sample(GpasLocalModel):
 
 
 class SampleDetail(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "sample_details"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -237,11 +236,11 @@ class SampleDetail(GpasLocalModel):
 
 
 class SampleDetailType(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "sample_detail_types"
 
     code: Mapped[str] = mapped_column(String(50), primary_key=True)
-    description: Mapped[text] = mapped_column(Text, nullable=True)
+    description: Mapped[Text] = mapped_column(Text, nullable=True)
     value_type: Mapped[ValueType] = mapped_column(
         Enum(
             *get_args(ValueType),
@@ -257,7 +256,7 @@ class SampleDetailType(GpasLocalModel):
 
 
 class Spike(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "spikes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -269,7 +268,7 @@ class Spike(GpasLocalModel):
 
 
 class Analysis(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "analyses"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -287,7 +286,7 @@ class Analysis(GpasLocalModel):
 
 
 class Speciation(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "speciations"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -306,7 +305,7 @@ class Speciation(GpasLocalModel):
 
 
 class Other(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "others"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -324,11 +323,11 @@ class Other(GpasLocalModel):
 
 
 class OtherType(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "other_types"
 
     code: Mapped[str] = mapped_column(String(50), primary_key=True)
-    description: Mapped[text] = mapped_column(Text, nullable=True)
+    description: Mapped[Text] = mapped_column(Text, nullable=True)
     value_type: Mapped[ValueType] = mapped_column(
         Enum(
             *get_args(ValueType),
@@ -342,7 +341,7 @@ class OtherType(GpasLocalModel):
 
 
 class DrugResistance(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "drug_resistances"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -363,7 +362,7 @@ class DrugResistance(GpasLocalModel):
 
 
 class DrugResistanceResultType(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "drug_resistance_result_types"
 
     code: Mapped[str] = mapped_column(String(1), primary_key=True)
@@ -375,7 +374,7 @@ class DrugResistanceResultType(GpasLocalModel):
 
 
 class Storage(GpasLocalModel):
-    __versioned__ = {}
+    __versioned__: Dict = {}
     __tablename__ = "storages"
 
     id: Mapped[int] = mapped_column(primary_key=True)

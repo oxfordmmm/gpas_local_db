@@ -1,7 +1,7 @@
 import pandas as pd  # type: ignore
 import gpaslocal.models as models
 from gpaslocal import __dbrevision__
-from gpaslocal.db import get_session, init_db, dispose_db
+from gpaslocal.db import get_session
 from gpaslocal.upload_models import (
     RunImport,
     SpecimensImport,
@@ -31,47 +31,42 @@ def db_revision_ok(session: Session) -> bool:
 
 
 def import_data(excel_wb: str, dryrun: bool = False) -> bool:
-    try:
-        init_db()
-
-        logger.info(
-            f"Verifying and uploading data to database from Excel Workbook {excel_wb}"
-        )
-        with get_session() as session:
-            try:
-                if not db_revision_ok(session):
-                    return False
-
-                runs(session, excel_wb=excel_wb, dryrun=dryrun)
-                session.flush()
-
-                specimens(session, excel_wb=excel_wb, dryrun=dryrun)
-                session.flush()
-
-                samples(session, excel_wb=excel_wb, dryrun=dryrun)
-                session.flush()
-
-                storage(session, excel_wb=excel_wb, dryrun=dryrun)
-                session.flush()
-
-            except Exception as e:
-                logger.error(f"Failed to upload data: {e}")
-
-            if logger.error_occurred:  # type: ignore
-                session.rollback()
-                logger.error("Upload failed, please see log messages for details")
+    logger.info(
+        f"Verifying and uploading data to database from Excel Workbook {excel_wb}"
+    )
+    with get_session() as session:
+        try:
+            if not db_revision_ok(session):
                 return False
 
-            if dryrun:
-                logger.info("Dry run mode, no data was uploaded")
-                session.rollback()
-            else:
-                logger.info("Data uploaded successfully")
-                session.commit()
+            runs(session, excel_wb=excel_wb, dryrun=dryrun)
+            session.flush()
 
-        return True
-    finally:
-        dispose_db()
+            specimens(session, excel_wb=excel_wb, dryrun=dryrun)
+            session.flush()
+
+            samples(session, excel_wb=excel_wb, dryrun=dryrun)
+            session.flush()
+
+            storage(session, excel_wb=excel_wb, dryrun=dryrun)
+            session.flush()
+
+        except Exception as e:
+            logger.error(f"Failed to upload data: {e}")
+
+        if logger.error_occurred:  # type: ignore
+            session.rollback()
+            logger.error("Upload failed, please see log messages for details")
+            return False
+
+        if dryrun:
+            logger.info("Dry run mode, no data was uploaded")
+            session.rollback()
+        else:
+            logger.info("Data uploaded successfully")
+            session.commit()
+
+    return True
 
 
 def runs(session: Session, excel_wb: str, dryrun: bool) -> None:
@@ -156,25 +151,22 @@ def specimens(session: Session, excel_wb: str, dryrun: bool) -> None:
 def owner(
     session: Session, index: int, specimen_import: SpecimensImport, dryrun: bool
 ) -> models.Owner:
-    try:
-        owner_record = (
-            session.query(models.Owner)
-            .filter(
-                models.Owner.site == specimen_import.owner_site,
-                models.Owner.user == specimen_import.owner_user,
-            )
-            .first()
+    owner_record = (
+        session.query(models.Owner)
+        .filter(
+            models.Owner.site == specimen_import.owner_site,
+            models.Owner.user == specimen_import.owner_user,
         )
-        if not owner_record:
-            owner_record = models.Owner(
-                site=specimen_import.owner_site, user=specimen_import.owner_user
-            )
-            session.add(owner_record)
-            logger.info(
-                f"Specimens Sheet Row {index+2}: Owner {specimen_import.owner_site}, {specimen_import.owner_user} does not exist{'' if dryrun else ', adding'}"
-            )
-    except DBAPIError as err:
-        logger.error(f"Specimens Sheet Row {index+2} : {err}")
+        .first()
+    )
+    if not owner_record:
+        owner_record = models.Owner(
+            site=specimen_import.owner_site, user=specimen_import.owner_user
+        )
+        session.add(owner_record)
+        logger.info(
+            f"Specimens Sheet Row {index+2}: Owner {specimen_import.owner_site}, {specimen_import.owner_user} does not exist{'' if dryrun else ', adding'}"
+        )
     return owner_record
 
 
@@ -337,13 +329,17 @@ def spikes(
     spike_fields = spike_names | spike_quantities
 
     # Extract the suffixes, convert them to integers
-    suffixes = [int(re.search(r"\d+$", k).group()) for k in spike_fields]
+    suffixes = []
+    for k in spike_fields:
+        match = re.search(r"\d+$", k)
+        if match is not None:
+            suffixes.append(int(match.group()))
     # make sure the suffixes are unique
     suffixes = list(set(suffixes))
 
     for i in suffixes:
-        spike_name = getattr(sample_import, f"spike_name_{i}", None)
-        spike_quantity = getattr(sample_import, f"spike_quantity_{i}", None)
+        spike_name: str = sample_import[f"spike_name_{i}"]
+        spike_quantity: str = sample_import[f"spike_quantity_{i}"]
         # check if either the name and quantity is missing then skip
         if pd.isnull(spike_name) and pd.isnull(spike_quantity):
             continue

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Engine
+from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from gpaslocal.config import config
 from contextlib import contextmanager
@@ -16,18 +16,10 @@ class Model(DeclarativeBase):
     )
 
 
-engine: Engine = None
-Session = None
-
-
-def init_db():
-    global engine, Session
-    engine = create_engine(config.DATABASE_URL)
-    Session = sessionmaker(engine)
-
-
 @contextmanager
 def get_session():
+    engine = create_engine(config.DATABASE_URL)
+    Session = sessionmaker(engine)
     session = Session()
     try:
         yield session
@@ -37,8 +29,4 @@ def get_session():
     finally:
         session.commit()
         session.close()
-
-
-def dispose_db():
-    global engine
-    engine.dispose()
+        engine.dispose()

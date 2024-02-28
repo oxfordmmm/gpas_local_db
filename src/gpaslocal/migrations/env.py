@@ -1,13 +1,13 @@
 import ast
-import astor
+import astor  # type: ignore
 from logging.config import fileConfig
-from sqlalchemy import Engine
 
 from alembic import context
 from alembic.script import ScriptDirectory
 
-from gpaslocal.db import Model, init_db, dispose_db, get_session
+from gpaslocal.db import Model, get_session
 import gpaslocal.models as models  # noqa: F401
+from gpaslocal.config import config as app_config
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,24 +23,9 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = Model.metadata
-init_db()
-
-from gpaslocal.db import engine  # noqa: E402
 
 # to keep mypy quiet do an assert
-assert isinstance(engine, Engine)
-config.set_main_option(
-    "sqlalchemy.url", engine.url.render_as_string(hide_password=False)
-)
-
-# config.set_main_option(
-#     "sqlalchemy.url", DATABASE_URL
-# )
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+config.set_main_option("sqlalchemy.url", app_config.DATABASE_URL)
 
 
 def run_migrations_offline() -> None:
@@ -100,11 +85,7 @@ def run_migrations_online() -> None:
         f.write(astor.to_source(tree))
 
 
-try:
-    if context.is_offline_mode():
-        run_migrations_offline()
-    else:
-        run_migrations_online()
-finally:
-    # Dispose of the engine when migrations are done
-    dispose_db()
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
