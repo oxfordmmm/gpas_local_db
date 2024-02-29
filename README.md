@@ -4,76 +4,70 @@ Database to be hosted locally in the hospital, holding GPAS sourced data plus ot
 
 ## Installation instructions
 
-To install the python application that allows uploading of the Excel Spreadsheet containing Specimen, Samples, Storage and Runs to the Local Hospital Database, the following are required:
+To install the Python Client on your local machine download the executable from [https://github.com/oxfordmmm/gpas_local_db/releases](https://github.com/oxfordmmm/gpas_local_db/releases), choosing the executable that matches your platform. Put the executable into a folder on your computer. Also download the following two files and put them into the same directory as the executable.
 
-* Python version 3.11 or greater
-* Access the OxfordMMM organisation in GitHub, including access to GitHub from the cli git application.
+[https://github.com/oxfordmmm/gpas_local_db/blob/main/ExcelSheets/RunSampleImport.xlsm](https://github.com/oxfordmmm/gpas_local_db/blob/main/ExcelSheets/RunSampleImport.xlsm)
+[https://github.com/oxfordmmm/gpas_local_db/blob/main/env_template](https://github.com/oxfordmmm/gpas_local_db/blob/main/env_template)
 
-Clone the GitHub repository to you local machine
+Note: The download button looks like an arrow putting downward into a box.
 
-```bash
-git clone git@github.com:oxfordmmm/gpas_local_db.git
-```
+Rename the `env_template` file to `.env` and edit using a plain text editor (not MS Word). The contents of the `.env` file should look like the following
 
-It is suggested that you setup a Python virtual environment to host the program. There are multiple ways of doing this, below is one way:
-
-```bash
-cd gpas_local_db
-python3.11 -m venv .venv
-```
-
-This will create the virtual environment under you project directory in the `.venv` folder.
-
-Activate the virutal environment using the following command:
-
-```bash
-source .venv/bin/activate
-```
-
-You will need to specify the database connection information. This is possible using 3 different methods. Environmental variables, a `.env` file or options added to the `gpaslocal` command. The recommended way is to have a `.env` file with the following structure:
-
-```bash
+```env
 DATABASE_USER = ''
 DATABASE_PASSWORD = ''
 DATABASE_HOST = ''
 DATABASE_PORT = '5432'
-DATABASE_NAME = 'gpas-local'
+DATABASE_NAME = ''
 ```
 
-The values for the entries will be provided by your local administrator. A template file is provided, which can be copied using the following command:
+Your system administrator should be able to give you the values to enter into the `.env` file. Please do not share these values or the file with anyone. Please also do not upload the file to any kind of sharing site.
+
+You will only need to setup the `.env` file when first downloading the file.
+
+### Mac code signing
+
+Modern Macs require executables to be code signed. The executable you downloaded is currently not code signed, so you will need to tell the system that this is ok. You should only do this if you are happy of the provenance of the executable.
+
+Open a terminal and cd into the directory where you have downloaded the files. You may need to make the file executable using a command similar to the following:
 
 ```bash
-cp env_template .env
+chmod +x ./gpaslocal-v0.0.15-macOS-arm64
 ```
 
-Do not share your `.env` file with anybody or upload it to any sharing site.
-
-To setup the Python program run the setup using `pip`:
+You will then need to release the file from quarritine using a command similar to the following:
 
 ```bash
-pip install .
+xattr -d com.apple.quarantine ./gpaslocal-v0.0.15-macOS-arm64
 ```
 
-From here and whilst the virtual environment is active, you can run the `gpaslocal` command to test and upload spreadsheets.
+### Entering the data
 
-To exit the virutal environment, use the `deactivate` command. You only need to run the setup the first time or when there is an update to the Python program.
+Use the Excel spreadsheet that you download as a template. When opening the spreadsheet, you will get a warning about macros, please click the enable macros button if you are happy with the provenance of the Excel Workbook. Using Excel enter you data into the four worksheets Runs, Specimens, Samples and Storage.
 
-## Updating the Python program
+### Running the application
 
-Activate your virtual environment using the relevant command e.g. `source .venv/bin/activate`. Pull down the latest version of the software and run the setup again:
+To run the use a command similar to the following for Mac and Linux
 
 ```bash
-git pull
-pip install .
+./gpaslocal-v0.0.15-macOS-arm64 upload <spreadsheet_name> --dryrun
 ```
 
-## Running the GpasLocal Python program
+and for Windows
 
-Use the `gpaslocal` command to upload spreadsheets based on the Excel Spreadsheet template provided. Use the `--dryrun` option to test if there are any errors with the import. The location of any errors should be reported. It is a good idea to use the `--dryrun` option until the import is clean.
+```cmd
+what is this???
+```
+
+Replacing the executable name with the one you download (the version number will probably be different), and replace `<spreadsheet_name>` with the name of your spreadsheet.
+
+You will probably get errors, so if they relate to the data entered, you can fix them in the spreadsheet. Otherwise contact you system admninistrator for advice.
+
+Keep running with the `--dryrun` flag until you get no errors. You can then remove the `--dryrun` flag to apply the data to the database.
 
 ## Running in development mode
 
-To make changes to the Python program or the structure of the database, make sure that you are running inside a virtual environment and use the following command to setup the Python program instead of the one detailed above.
+Clone the repo to your local machine. You will need to setup the `.env` file as detailed above. You will need to create a blank database and a database user that has permissions to that database. Put this information in the `.env` file. To make changes to the Python program or the structure of the database, make sure that you are running inside a virtual environment and use the following command to setup the Python program.
 
 ```bash
 pip install .[dev]
@@ -87,7 +81,7 @@ We use Alembic to handle the changes to the database (migrations), this is only 
 alembic upgrade head
 ```
 
-If you have mode changes to the database models, you will need to generate a new migration using the following command.
+If you have made changes to the database models, you will need to generate a new migration using the following command.
 
 ```bash
 alembic revision --autogenerate -m "message"
