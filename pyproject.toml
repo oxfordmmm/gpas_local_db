@@ -7,30 +7,31 @@ name = "gpaslocal"
 dynamic = ["version"]
 description = "Upload and manage GPAS data locally"
 readme = "README.md"
-requires-python = ">=3.10.0"
+requires-python = ">=3.11.0"
 authors = [
     {name = "Marc Brouard", email = "brouard.marc@gmail.com"},
 ]
 classifiers = [
     "Environment :: Console",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 dependencies = [
-    "iso3166",
-    "psycopg2-binary",
-    "python-dotenv",
-    "SQLAlchemy",
-    "typing_extensions",
-    "pydantic",
-    "pandas",
-    "openpyxl",
-    "pyarrow",
-    "errorhandler",
-    "click",
-    "click-log",
-    "progressbar2",
-    "SQLAlchemy-Continuum",
+    "click==8.1.7",
+    "click-log==0.4.0",
+    "errorhandler==2.0.1",
+    "iso3166==2.1.1",
+    "openpyxl==3.1.2",
+    "pandas==2.2.0",
+    "progressbar2==4.3.2",
+    "psycopg2-binary==2.9.9",
+    "pyarrow==15.0.0",
+    "pydantic==2.6.1",
+    "python-dotenv==1.0.1",
+    "SQLAlchemy==2.0.27",
+    "SQLAlchemy-Continuum==1.4.0",
+    "SQLAlchemy-Utils>=0.41.1",
+    "typing_extensions==4.9.0",
 ]
 
 [project.scripts]
@@ -38,12 +39,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=6.2.4",
-    "alembic",
-    "ipython",
-    "mypy",
-    "ruff",
-    "astor",
-    "pytest-postgresql",
-    "pytest-cov",
+    "alembic==1.13.1",
+    "astor==0.8.1",
+    "ipython==8.21.0",
+    "mypy==1.8.0",
+    "pytest==8.0.0",
+    "pytest-cov==4.1.0",
+    "pytest-postgresql==5.1.0",
+    "ruff==0.2.1",
 ]
