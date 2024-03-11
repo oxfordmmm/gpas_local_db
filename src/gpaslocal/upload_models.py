@@ -73,7 +73,7 @@ class SamplesImport(ImportModel):
     accession: Annotated[ExcelStr, Field(max_length=20)]
     collection_date: ExcelDate[date]
     guid: Annotated[ExcelStr, Field(max_length=64)]
-    sample_category: SampleCategory
+    sample_category: NoneOrNan[SampleCategory] = None
     nucleic_acid_type: NoneOrNan[List[NucleicAcidType]] = None
     dilution_post_initial_concentration: NoneOrNan[bool] = None
     extraction_date: OptionalExcelDate[date] = None

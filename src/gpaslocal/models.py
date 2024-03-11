@@ -193,7 +193,7 @@ class Sample(GpasLocalModel):
 
     @nucleic_acid_type.setter  # type: ignore
     def nucleic_acid_type(self, value):
-        self._nucleic_acid_type = value if isinstance(value, list) else list(value)
+        self._nucleic_acid_type = value if isinstance(value, list) else [] if value is None else list(value)
 
     run: Mapped["Run"] = relationship("Run", back_populates="samples")
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="samples")
