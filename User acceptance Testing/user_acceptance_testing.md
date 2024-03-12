@@ -1,0 +1,93 @@
+# User acceptance testing
+
+This document describes what should be tested before the system is accepted by the users. When referring to a cell in the Excel workbook the following convention is used excel_sheet_name.`excel_column_name`
+
+## Excel Workbook
+
+The main input into the system is an MS Excel workbook, with currently six worksheets. Currently there is no protection applied to the workbook and the AdminLookup sheet is available. Having the excel workbook unprotected is for testing purposes.
+
+### Overview Excel worksheet
+
+This worksheet provides an overview of the four data entry worksheets, Runs, Specimens, Samples and Storage.
+
+- [ ] Check that the description of each Excel data entry worksheet is correct and is an accurate description
+- [ ] Check the description of the columns is correct.
+- [ ] Make sure that the compulsory columns are correct and no others are needed
+
+### Runs Excel worksheet
+
+Allows the entry and update of runs.
+
+- [ ] `Code` column has to be unique for each run. If you enter a duplicate code it will overwrite the previous one. Allows free form text with a length of up to 20 characters
+- [ ] `run_date` column has to be a valid date.
+- [ ] `site` provides a lookup dropdown populated from AdminLookup.`run_site`
+  - [ ] Check that only values from AdminLookup.`run_site` can be entered
+  - [ ] It should be possible to enter a blank value, although when the workbook is uploaded an error will be thrown if this is left blank for a entered row
+- [ ] `sequencing_method` provides a lookup dropdown populated from AdminLookup.`sequencing_method`
+  - [ ] Check that only values from the AdminLookup.`sequencing_method` can be entered
+  - [ ] It should be possible to enter a blank value, although when the workbook is uploaded an error will be thrown if this is left blank for a entered row
+- [ ] `machine` is a free form text field.
+  - [ ] It should be possible to enter a blank value, although when the workbook is uploaded an error will be thrown if this is left blank for a entered row
+  - [ ] Limited to a length of 20 characters
+- [ ] `user` is a free form text field limited to 5 characters length
+- [ ] `number_of_samples` is limited to an integer value (no decimal part)
+- [ ] `flowcell` is a free form text field limited to 20 characters length
+- [ ] `passed_qc` is limited to yes or no values. The yes or no values are taken from AdminLookup.`yes_no`
+  - [ ] It should be possible to enter a blank value, although when the workbook is uploaded an error will be thrown if this is left blank for a entered row.
+- [ ] `comment` free form text field, limited to 32,767 characters (Excel's limit of characters per cell)
+
+### Specimens Excel Worksheet
+
+Allows the entry and update of runs.
+
+- [ ] `owner_site` provides a free form text field with maximum length of 50 characters. This value is mandatory for an entered row.
+- [ ] `owner_user` provides a free form text field with a maximum length of 50 characters. This value is mandatory for an entered row.
+- [ ] `accession` a free form text field with a maximum length of 20 characters. This value is mandatory for an entered row. Each specimen has to have a unique `accession` and `collection_date`.
+- [ ] `collection_date` requires a valid date to be entered. This value is mandatory for an entered row. Each specimen has to have a unique `accession` and `collection_date`.
+- [ ] `country_sample_taken` is the name of the country where the sample taken, provided as a lookup dropdown. The list is populated from AdminLookup.`country_names`. This follows the ISO3166 standard, and needs to be a valid country name. This value is mandatory for an entered row.
+- [ ] `country_sample_taken_code` is populated when `country_sample_taken` is set. It is not meant to be edited by the user. Currently it can be modified because no protection is enabled on the Excel Worksheet. This is 3 digit code compliant with ISO3166.
+- [ ] `specimen_type` is a free form text field with a maximum length of 50 characters.
+- [ ] `specimen_qr_code` is a free form text field only limited in length by the excel limit of 32,767 characters
+- [ ] `bar_code` is a free form text field only limited in length by the excel limit of 32,767 characters
+- [ ] `organism` is a free form text field with a maximum length of 50 characters.
+- [ ] `host` is a free form text field with a maximum length of 50 characters.
+- [ ] `host_diseases` is a free form text field with a maximum length of 50 characters.
+- [ ] `isolation_source` is a free form text field with a maximum length of 50 characters.
+- [ ] `lat` requires a floating point value in the range -90 to +90.
+- [ ] `lon` requires a floating point value in the range -90 to +90.
+
+### Samples Excel worksheet
+
+Allows the entry and update of samples
+
+- [ ] `run_code` a valid code of a run. Must either be in the Run sheet or already exist in the system. Allows free form text with a length of up to 20 characters.
+- [ ] `accession` a valid accession of a specimen combined with the `collection_date`. The combination of `accession` and `collection_date` must exist in either the Specimens worksheet or already be in the database. A free form text field with a maximum length of 20 characters.
+- [ ] `collection_date` a valid date. The combination of `accession` and `collection_date` must exist in either the Specimens worksheet or already be in the database.
+- [ ] `guid` a free form text field with a maximum length of 64 characters. This is the unique identifier for the sample.
+- [ ] `sample_category` a lookup dropdown. The list is populated from AdminLookup.`sample_category`
+- [ ] `nucleic_acid_type` a lookup dropdown. The list is populated from AdminLookup.`nucleic_acid_type`.nucleic_acid_type
+- [ ] `dilution_post_initial_concentration` a lookup dropdown. The list is populated from AdminLookup.`nucleic_acid_type`
+- [ ] `extraction_date` a valid date. Can be blank
+- [ ] `extraction_method` a free form text field with maximum length of 50 characters.
+- [ ] `extraction_protocol` a free form text field with maximum length of 50 characters.
+- [ ] `extraction_user` a free form text field with maximum length of 50 characters.
+- [ ] `illumina_index` a free form text field with maximum length of 50 characters.
+- [ ] `input_volume` a floating point number. ??? what are the min max values ???
+- [ ] `library_pool_concentration` a floating point number. ??? what are the min max values ???
+- [ ] `ont_barcode` is a free form text field only limited in length by the excel limit of 32,767 characters
+- [ ] `phl_amplification` True or False
+- [ ] `pre_sequence_concentration` a floating point number. ??? what are the min max values ???
+- [ ] `prep_kit` a free form text field with maximum length of 50 characters.
+- [ ] `comment` is a free form text field only limited in length by the excel limit of 32,767 characters
+- [ ] `spike_name_#` a free form text field with a maximum length of 50 characters. The hash is replaced with a number. The spike name and spike quantity fields are paired e.g. `spike_name_1` and `spike_quantity_1`.
+- [ ] `spike_quantity_#` a floating point number. ??? what are the min max values ???
+
+### Storage Excel worksheet
+
+The worksheet holds the details of where the specimens are held.
+
+Currently needs to be refactored, once this is done the details will be added here
+
+## Upload command line program
+
+
