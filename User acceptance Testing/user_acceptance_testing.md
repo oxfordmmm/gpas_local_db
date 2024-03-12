@@ -73,14 +73,14 @@ Allows the entry and update of samples
 - [ ] `extraction_user` a free form text field with maximum length of 50 characters.
 - [ ] `illumina_index` a free form text field with maximum length of 50 characters.
 - [ ] `input_volume` a floating point number. ??? what are the min max values ???
-- [ ] `library_pool_concentration` a floating point number. ??? what are the min max values ???
+- [ ] `library_pool_concentration` a floating point number. Ranges from 0.1 to 10
 - [ ] `ont_barcode` is a free form text field only limited in length by the excel limit of 32,767 characters
 - [ ] `phl_amplification` True or False
-- [ ] `pre_sequence_concentration` a floating point number. ??? what are the min max values ???
+- [ ] `pre_sequence_concentration` a floating point number. Ranges from 01. to 1000
 - [ ] `prep_kit` a free form text field with maximum length of 50 characters.
 - [ ] `comment` is a free form text field only limited in length by the excel limit of 32,767 characters
 - [ ] `spike_name_#` a free form text field with a maximum length of 50 characters. The hash is replaced with a number. The spike name and spike quantity fields are paired e.g. `spike_name_1` and `spike_quantity_1`.
-- [ ] `spike_quantity_#` a floating point number. ??? what are the min max values ???
+- [ ] `spike_quantity_#` a floating point number. with a maximum value of 20
 
 ### Storage Excel worksheet
 
