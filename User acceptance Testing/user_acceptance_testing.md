@@ -113,7 +113,7 @@ When the contents of the database needs to be checked, you may not have access t
 - [ ] mandatory cells are required and the upload program logs an error if not entered
 - [ ] for non-mandatory fields check that a blank cell value is allowed
 
-### For the Runs worksheet try entering and uploading:
+### For the Runs worksheet try entering and uploading
 
 - [ ] Blank and valid values for the mandatory cells in combination. If one of the mandatory cells is blank you should get an error. The mandatory columns are:
   - [ ] code
@@ -129,7 +129,7 @@ When the contents of the database needs to be checked, you may not have access t
   - [ ] comment
 - [ ] Enter two rows with the same 'code', not already in the database. You should get a message for the first stating that it does not exist, and a message for the second saying it does exist.
 
-### For the Specimens worksheet try entering and uploading:
+### For the Specimens worksheet try entering and uploading
 
 - [ ] Blank and valid values for the mandatory cells in combination. If one of the mandatory cells is blank you should get an error. The mandatory columns are:
   - [ ] owner_site
@@ -149,7 +149,7 @@ When the contents of the database needs to be checked, you may not have access t
   - [ ] lat
   - [ ] lon
 
-### For the Samples worksheet try entering and uploading:
+### For the Samples worksheet try entering and uploading
 
 - [ ] a `run_code` that does not exist in the run sheet or the database. You should get an error when uploading
 - [ ] an `accession` and `collection_date` combination that does not exist either in the specimen sheet or the database. You should get an error
