@@ -76,10 +76,8 @@ def run_migrations_online() -> None:
         tree = ast.parse(f.read())
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.Assign):
-            for target in node.targets:
-                if isinstance(target, ast.Name) and target.id == "__dbrevision__":
-                    node.value = ast.Str(s=head_revision)
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.target.id == "__dbrevision__":
+            node.value = ast.Str(s=head_revision)
 
     with open("src/gpaslocal/__init__.py", "w") as f:
         f.write(astor.to_source(tree))
