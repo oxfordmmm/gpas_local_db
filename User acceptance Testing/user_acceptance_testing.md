@@ -16,7 +16,7 @@ This worksheet provides an overview of the four data entry worksheets, Runs, Spe
 
 ### Runs Excel worksheet
 
-Allows the entry and update of runs.
+Allows the entry and update of runs. Go through each of the columns and make sure that the data validation and if applicable dropdowns are working. E.g. for a date field make sure that only a date can be entered.
 
 - [ ] `Code` column has to be unique for each run. If you enter a duplicate code it will overwrite the previous one. Allows free form text with a length of up to 20 characters
 - [ ] `run_date` column has to be a valid date.
@@ -38,7 +38,7 @@ Allows the entry and update of runs.
 
 ### Specimens Excel Worksheet
 
-Allows the entry and update of runs.
+Allows the entry and update of runs. Go through each of the columns and make sure that the data validation and if applicable dropdowns are working. E.g. for a date field make sure that only a date can be entered.
 
 - [ ] `owner_site` provides a free form text field with maximum length of 50 characters. This value is mandatory for an entered row.
 - [ ] `owner_user` provides a free form text field with a maximum length of 50 characters. This value is mandatory for an entered row.
@@ -58,7 +58,7 @@ Allows the entry and update of runs.
 
 ### Samples Excel worksheet
 
-Allows the entry and update of samples
+Allows the entry and update of samples. Go through each of the columns and make sure that the data validation and if applicable dropdowns are working. E.g. for a date field make sure that only a date can be entered.
 
 - [ ] `run_code` a valid code of a run. Must either be in the Run sheet or already exist in the system. Allows free form text with a length of up to 20 characters.
 - [ ] `accession` a valid accession of a specimen combined with the `collection_date`. The combination of `accession` and `collection_date` must exist in either the Specimens worksheet or already be in the database. A free form text field with a maximum length of 20 characters.
@@ -84,10 +84,78 @@ Allows the entry and update of samples
 
 ### Storage Excel worksheet
 
-The worksheet holds the details of where the specimens are held.
+The worksheet holds the details of where the specimens are held. Go through each of the columns and make sure that the data validation and if applicable dropdowns are working. E.g. for a date field make sure that only a date can be entered.
 
 Currently needs to be refactored, once this is done the details will be added here
 
 ## Upload command line program
 
+The CLI command line program allows the upload of the Excel Workbook into the database on the local hospital network. Instructions for it's installation and use are in the [README.md](https://github.com/oxfordmmm/gpas_local_db).
 
+As detailed in the `README.md` usage instructions, it is possible to use the `--dryrun` option to test the spreadsheet against the database. This is suggested for most of the testing.
+
+When the contents of the database needs to be checked, you may not have access to the database, please ask the database administrator.
+
+### For each of the Excel worksheets test
+
+- [ ] mandatory cells are required and the upload program logs an error if not entered
+- [ ] for non-mandatory fields check that a blank cell value is allowed
+
+### For the Runs worksheet try entering and uploading:
+
+- [ ] Blank and valid values for the mandatory cells in combination. If one of the mandatory cells is blank you should get an error. The mandatory columns are:
+  - [ ] code
+  - [ ] run_date
+  - [ ] site
+  - [ ] sequencing_method
+  - [ ] machine
+- [ ] For the following non mandatory fields enter both blanks and valid values. Ask the database admin to confirm they are uploaded correctly into the database when not using `--dryrun`
+  - [ ] user
+  - [ ] number_samples
+  - [ ] flowcell
+  - [ ] passed_qc
+  - [ ] comment
+- [ ] Enter two rows with the same 'code', not already in the database. You should get a message for the first stating that it does not exist, and a message for the second saying it does exist.
+
+### For the Specimens worksheet try entering and uploading:
+
+- [ ] Blank and valid values for the mandatory cells in combination. If one of the mandatory cells is blank you should get an error. The mandatory columns are:
+  - [ ] owner_site
+  - [ ] owner_user
+  - [ ] accession
+  - [ ] collection_date
+  - [ ] country_sample_taken
+- [ ] When entering the `country_sample_taken` the `country_sample_taken_code` should be automatically updated. Currently because the Excel workbook is not protected, it is possible to edit `country_sample_taken_code`, but you should not.
+- [ ] For the following non mandatory fields try entering both blanks and valid values. Ask the database admin to confirm they are entered correctly into the database when not using `--dryrun`
+  - [ ] specimen_type
+  - [ ] specimen_qr_code
+  - [ ] bar_code
+  - [ ] organism
+  - [ ] host
+  - [ ] host_diseases
+  - [ ] isolation_source
+  - [ ] lat
+  - [ ] lon
+
+### For the Samples worksheet try entering and uploading:
+
+- [ ] a `run_code` that does not exist in the run sheet or the database. You should get an error when uploading
+- [ ] an `accession` and `collection_date` combination that does not exist either in the specimen sheet or the database. You should get an error
+- [ ] a blank `accession`. You should get an error.
+- [ ] a blank `collection_date`. You should should get an error.
+- [ ] Enter two rows with the same `guid`, not already in the database. You should get a message for the first stating that it does not exist, and a message for the second saying it does exist.
+- [ ] For the following non mandatory fields try entering both blanks and valid values. Ask the database admin to confirm they are entered correctly into the database when not using `--dryrun`
+  - [ ] nucleic_acid_type
+  - [ ] dilution_post_initial_concentration
+  - [ ] extraction_date
+  - [ ] extraction_method
+  - [ ] extraction_protocol
+  - [ ] extraction_user
+  - [ ] illumina_index
+  - [ ] input_volume
+  - [ ] library_pool_concentration
+  - [ ] ont_barcode
+  - [ ] dna_amplification
+  - [ ] pre_sequence_concentration
+  - [ ] prep_kit
+  - [ ] comment
