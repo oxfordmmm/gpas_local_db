@@ -72,7 +72,7 @@ Allows the entry and update of samples. Go through each of the columns and make 
 - [ ] `extraction_protocol` a free form text field with maximum length of 50 characters.
 - [ ] `extraction_user` a free form text field with maximum length of 50 characters.
 - [ ] `illumina_index` a free form text field with maximum length of 50 characters.
-- [ ] `input_volume` a floating point number. ??? what are the min max values ???
+- [ ] `input_volume` a floating point number. Ranges from 0.1 to 30
 - [ ] `library_pool_concentration` a floating point number. Ranges from 0.1 to 10
 - [ ] `ont_barcode` is a free form text field only limited in length by the excel limit of 32,767 characters
 - [ ] `phl_amplification` True or False
@@ -86,7 +86,19 @@ Allows the entry and update of samples. Go through each of the columns and make 
 
 The worksheet holds the details of where the specimens are held. Go through each of the columns and make sure that the data validation and if applicable dropdowns are working. E.g. for a date field make sure that only a date can be entered.
 
-Currently needs to be refactored, once this is done the details will be added here
+All fields are mandatory, except for the `notes` cell in the storage sheet
+
+- [ ] `accession` a valid accession of a specimen combined with the `collection_date`. The combination of `accession` and `collection_date` must exist in either the Specimens worksheet or already be in the database. A free form text field with a maximum length of 20 characters.
+- [ ] `collection_date` a valid date. The combination of `accession` and `collection_date` must exist in either the Specimens worksheet or already be in the database.
+- [ ] `freezer` free form text with a maximum length of 50
+- [ ] `shelf` free form text with a maximum length of 50
+- [ ] `rack` free form text with a maximum length of 50
+- [ ] `tray` free form text with a maximum length of 50
+- [ ] `box` free form text with a maximum length of 50
+- [ ] `box_location` free form text with a maximum length of 50
+- [ ] `storage_qr_code` is a free form text field only limited in length by the excel limit of 32,767 characters
+- [ ] `date_into_storage` valid date
+- [ ] `notes` is a free form text field only limited in length by the excel limit of 32,767 characters
 
 ## Upload command line program
 
@@ -159,3 +171,17 @@ When the contents of the database needs to be checked, you may not have access t
   - [ ] pre_sequence_concentration
   - [ ] prep_kit
   - [ ] comment
+
+### For the Storage worksheet try entering and uploading
+
+- [ ] an `accession` and `collection_date` combination that does not exist either in the specimen sheet or the database. You should get an error
+- [ ] Try combination of blanks and valid values for the following fields. Any blanks should return an error
+  - [ ] freezer
+  - [ ] shelf
+  - [ ] rack
+  - [ ] tray
+  - [ ] box
+  - [ ] box_location
+  - [ ] storage_qr_code
+  - [ ] date_into_storage
+  - [ ] this field is optional, and can except freeform text, trying blank and free form text, no errors should be raised for this.
