@@ -379,15 +379,18 @@ class Storage(GpasLocalModel):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     specimen_id: Mapped[int] = mapped_column(ForeignKey("specimens.id"))
-    freezer_id: Mapped[str] = mapped_column(String(20))
-    freezer_compartment: Mapped[str] = mapped_column(String(20))
-    freezer_sub_compartment: Mapped[str] = mapped_column(String(20))
+    freezer: Mapped[str] = mapped_column(String(50))
+    shelf: Mapped[str] = mapped_column(String(50))
+    rack: Mapped[str] = mapped_column(String(50))
+    tray: Mapped[str] = mapped_column(String(50))
+    box: Mapped[str] = mapped_column(String(50))
+    box_location: Mapped[str] = mapped_column(String(50))
     storage_qr_code: Mapped[Text] = mapped_column(Text, nullable=False, unique=True)
     date_into_storage: Mapped[date] = mapped_column(
         default=datetime.utcnow, nullable=False
     )
+    notes: Mapped[Text] = mapped_column(Text, nullable=True)
 
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="storages")
-
 
 configure_mappers()

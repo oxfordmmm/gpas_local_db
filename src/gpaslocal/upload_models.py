@@ -109,8 +109,12 @@ class SamplesImport(ImportModel):
 class StoragesImport(ImportModel):
     accession: Annotated[str, Field(max_length=20)]
     collection_date: ExcelDate[date]
-    freezer_id: Annotated[ExcelStr, Field(max_length=20)]
-    freezer_compartment: Annotated[ExcelStr, Field(max_length=20)]
-    freezer_sub_compartment: Annotated[ExcelStr, Field(max_length=20)]
+    freezer: Annotated[ExcelStr, Field(max_length=50)]
+    shelf: Annotated[ExcelStr, Field(max_length=50)]
+    rack: Annotated[ExcelStr, Field(max_length=50)]
+    tray: Annotated[ExcelStr, Field(max_length=50)]
+    box: Annotated[ExcelStr, Field(max_length=50)]
+    box_location: Annotated[ExcelStr, Field(max_length=50)]
     storage_qr_code: ExcelStr
     date_into_storage: ExcelDate[date]
+    notes: NoneOrNan[ExcelStr] = None
