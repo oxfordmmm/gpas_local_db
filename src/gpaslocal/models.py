@@ -273,6 +273,7 @@ class Analysis(GpasLocalModel):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     sample_id: Mapped[int] = mapped_column(ForeignKey("samples.id"))
+    batch_name: Mapped[str] = mapped_column(String(20))
     assay_system: Mapped[str] = mapped_column(String(20))
 
     sample: Mapped["Sample"] = relationship("Sample", back_populates="analyses")
