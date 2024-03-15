@@ -2,6 +2,7 @@ from typing import Annotated, Literal, Any, TypeVar, Optional
 from math import isnan
 import pandas as pd  # type: ignore
 from datetime import datetime
+from dateutil.parser import parse
 from sqlalchemy import String, text
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.postgresql import TIMESTAMP
@@ -29,6 +30,10 @@ def coerce_nan_to_none(x: Any) -> Any:
 
 
 def coerce_nat_to_none(x: Any) -> Any:
+    if isinstance(x, str) and not x.strip():
+        return None
+    elif isinstance(x, str):
+        return parse(x).date()
     return None if pd.isnull(x) else x
 
 
