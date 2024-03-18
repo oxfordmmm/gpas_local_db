@@ -53,3 +53,12 @@ jobs:
         asset_path: ./dist/gpaslocal-${{ env.RELEASE_VERSION }}-${{ runner.os }}-${{ matrix.arch }}${{ runner.os == 'Windows' && '.exe' || '' }}
         asset_name: gpaslocal-${{ env.RELEASE_VERSION }}-${{ runner.os }}-${{ matrix.arch }}${{ runner.os == 'Windows' && '.exe' || '' }}
         asset_content_type: application/octet-stream
+    - name: Upload Spreadsheet to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ExcelSheets/RunSampleImport.xlsm
+        asset_name: RunSampleImport.xlsm
+        asset_content_type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
