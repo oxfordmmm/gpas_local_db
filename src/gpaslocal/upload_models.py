@@ -19,6 +19,7 @@ from gpaslocal.constants import (
     ExcelDate,
     OptionalExcelDate,
 )
+from typing_extensions import Self
 
 
 class ImportModel(BaseModel):
@@ -135,10 +136,13 @@ class GpasSummary(ImportModel):
             raise ValueError("Sample name not found in mapping file")
         return v
     
-    @model_validator(mode="after")
-    def split_species(self) -> "GpasSummary":
-        if self.species:
-            split_species = self.species.split(" ", 1)
-            self.species = split_species[0]
-            self.sub_species = split_species[1] if len(split_species) > 1 else None
+    @model_validator(mode="before")
+    def split_species(self) -> Self:
+        if pd.notna(self['Main Species']):
+            split_species = self['Main Species'].split(" ", 1)
+            self['species'] = split_species[0]
+            self['sub_species'] = split_species[1] if len(split_species) > 1 else None
+        else:
+            self['species'] = None
+            self['sub_species'] = None
         return self

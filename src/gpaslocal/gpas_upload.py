@@ -12,7 +12,7 @@ from pydantic import ValidationError
 def import_summary(summary_csv: str, mapping_csv: str, dryrun: bool):
     """Upload data from a summary csv"""
     logger.info(
-        f"Verifying and uploading data to database from Summary.csv {summary_csv}"
+        f"Verifying and uploading data to database from Summary {summary_csv}"
     )
     with get_session() as session:
         try:
@@ -46,8 +46,6 @@ def import_summary(summary_csv: str, mapping_csv: str, dryrun: bool):
                 except ValueError as err:
                     logger.error(f"Summary Row {index+2} : {err}")
                 
-            print(df_merged)
-        
         except Exception as e:
             logger.error(f"Failed to upload data: {e}") 
 
@@ -99,12 +97,18 @@ def analysis(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bo
         )
         session.add(analysis)
         logger.info(
-            f"Summary row {index+2}: Batch {gpas_summary.Batch}, Sample {gpas_summary.sample_name} does not exist{'' if dryrun else ', adding'}"
+            f"Summary row {index+2}: Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} does not exist{'' if dryrun else ', adding'}"
         )
     
     return analysis
 
-def speciation(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool, analysis_record: models.Analysis):
+def speciation(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool, analysis_record: models.Analysis) -> models.Speciation | None:
+    if gpas_summary.species is None:
+        logger.info(
+            f"Summary row {index+2}: Speciation for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} not found"
+        )
+        return None
+    
     if speciation := (
         session.query(models.Speciation)
         .filter(
@@ -114,7 +118,7 @@ def speciation(session: Session, gpas_summary: GpasSummary, index: int, dryrun: 
         .first()
     ):
         logger.info(
-            f"Summary row {index+2}: Speciation for Batch {gpas_summary.Batch}, Sample {gpas_summary.sample_name} already exists{'' if dryrun else ', updating'}"
+            f"Summary row {index+2}: Speciation for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} already exists{'' if dryrun else ', updating'}"
         )
     else:
         speciation = models.Speciation(
@@ -123,7 +127,7 @@ def speciation(session: Session, gpas_summary: GpasSummary, index: int, dryrun: 
         )
         session.add(speciation)
         logger.info(
-            f"Summary row {index+2}: Speciation for Batch {gpas_summary.Batch}, Sample {gpas_summary.sample_name} does not exist{'' if dryrun else ', adding'}"
+            f"Summary row {index+2}: Speciation for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} does not exist{'' if dryrun else ', adding'}"
         )
         
     speciation.species = gpas_summary.species
