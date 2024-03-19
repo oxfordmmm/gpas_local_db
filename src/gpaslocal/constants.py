@@ -42,3 +42,15 @@ NoneOrNan = Annotated[Optional[T], BeforeValidator(coerce_nan_to_none)]
 ExcelDate = Annotated[T, BeforeValidator(coerce_nat_to_none)]
 ExcelStr = Annotated[str, BeforeValidator(coerce_to_str)]
 OptionalExcelDate = Annotated[Optional[T], BeforeValidator(coerce_nat_to_none)]
+
+# Drugs in the order they appear in the summary csv. Key is the location in the string
+tb_drugs = {
+    0: "Isoniazid (INH)", 
+    1: "Rifampicin (RIF)", 
+    2: "Pyrazinamide (PZA)", 
+    3: "Ethambutol (EMB)", 
+    5: "Moxifloxacin (MXF)", 
+    6: "Levofloxacin (LEV)", 
+    8: "Linezolid (LZD)", 
+    9: "Bedaquiline (BDQ)"
+}

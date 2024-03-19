@@ -1,3 +1,4 @@
+import re
 from gpaslocal.logs import logger
 from gpaslocal.db import get_session
 from gpaslocal.db import db_revision_ok
@@ -8,6 +9,7 @@ from gpaslocal.upload_models import GpasSummary
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 from pydantic import ValidationError
+from gpaslocal.constants import tb_drugs
 
 def import_summary(summary_csv: str, mapping_csv: str, dryrun: bool):
     """Upload data from a summary csv"""
@@ -33,7 +35,7 @@ def import_summary(summary_csv: str, mapping_csv: str, dryrun: bool):
                     
                     speciation(session, gpas_summary, index, dryrun, analysis_record)
                     
-                    
+                    drugs(session, gpas_summary, index, dryrun, analysis_record)
                     
                 except ValidationError as err:
                     for error in err.errors():
@@ -136,3 +138,24 @@ def speciation(session: Session, gpas_summary: GpasSummary, index: int, dryrun: 
     ## TODO - missing the analysis date value
     
     return speciation 
+
+def drugs(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool, analysis_record: models.Analysis):
+    if gpas_summary.resistance_prediction is None or gpas_summary.resistance_prediction == "Complete":
+        logger.info(
+            f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} Empty"
+        )
+        return
+    
+    # check we have the correct format for drug resistance prediction
+    if not re.match(r"^[SRUF_]{4}\s[SRUF_]{2}\s[SRUF_]{2}$", gpas_summary.resistance_prediction):
+        raise ValueError(f"Invalid drug resistance prediction {gpas_summary.resistance_prediction}")
+    
+    for key, value in tb_drugs.items():
+        drug_resistance = models.DrugResistance(
+            analysis = analysis_record,
+            antibiotic = value,
+            drug_resistance_result_type_code = gpas_summary.resistance_prediction[key]
+        )
+        session.add(drug_resistance)
+        
+    logger.info(f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} added")
