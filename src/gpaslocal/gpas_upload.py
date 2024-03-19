@@ -87,7 +87,7 @@ def analysis(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bo
     ):
         analysis.assay_system == "GPAS TB"
         logger.info(
-            f"Summary row {index+2}: Batch {gpas_summary.Batch}, Sample {gpas_summary.sample_name} already exists{'' if dryrun else ', updating'}"
+            f"Summary row {index+2}: Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} already exists{'' if dryrun else ', updating'}"
         )
     else:
         analysis = models.Analysis(
