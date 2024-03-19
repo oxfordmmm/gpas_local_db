@@ -294,8 +294,8 @@ class Speciation(GpasLocalModel):
     analysis_id: Mapped[int] = mapped_column(ForeignKey("analyses.id"))
     species_number: Mapped[int] = mapped_column()
     species: Mapped[str] = mapped_column(String(100))
-    sub_species: Mapped[str] = mapped_column(String(100), nullable=True)
-    analysis_date: Mapped[date] = mapped_column(default=datetime.utcnow, nullable=True)
+    sub_species: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    analysis_date: Mapped[Optional[date]] = mapped_column(default=datetime.utcnow, nullable=True)
     data: Mapped[Optional[dict | list]] = mapped_column(type_=JSON, nullable=True)
 
     analysis: Mapped["Analysis"] = relationship(
