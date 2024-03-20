@@ -1,4 +1,3 @@
-import re
 from gpaslocal.logs import logger
 from gpaslocal.db import get_session
 from gpaslocal.db import db_revision_ok

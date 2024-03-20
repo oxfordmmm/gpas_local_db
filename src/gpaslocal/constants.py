@@ -2,7 +2,6 @@ from typing import Annotated, Literal, Any, TypeVar, Optional
 from math import isnan
 import pandas as pd  # type: ignore
 from datetime import datetime
-from dateutil.parser import parse
 from sqlalchemy import String, text
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.postgresql import TIMESTAMP
