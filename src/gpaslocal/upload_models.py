@@ -1,3 +1,4 @@
+import re
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -9,7 +10,7 @@ from pydantic import (
 from datetime import date
 from iso3166 import countries
 import pandas as pd  # type: ignore
-from typing import List, Annotated
+from typing import List, Annotated, Optional
 from gpaslocal.constants import ExcelStr
 from gpaslocal.constants import (
     SequencingMethod,
@@ -19,6 +20,7 @@ from gpaslocal.constants import (
     ExcelDate,
     OptionalExcelDate,
 )
+from typing_extensions import Self
 
 
 class ImportModel(BaseModel):
@@ -118,3 +120,42 @@ class StoragesImport(ImportModel):
     storage_qr_code: ExcelStr
     date_into_storage: ExcelDate[date]
     notes: NoneOrNan[ExcelStr] = None
+
+
+class GpasSummary(ImportModel):
+    sample_name: Annotated[ExcelStr, Field(max_length=20)]
+    batch: Annotated[ExcelStr, Field(max_length=20, alias="Batch")]
+    main_species: Annotated[ExcelStr, Field(max_length=50, alias="Main Species")]
+    resistance_prediction: Annotated[Optional[ExcelStr], Field(max_length=50, alias="Resistance Prediction")]
+    run_date: Optional[date] = None
+    species: Optional[str]
+    sub_species: Optional[str]
+    
+    model_config = ConfigDict(extra="allow")
+    
+    @field_validator("sample_name", mode="before")
+    @classmethod
+    def validate_sample_name(cls, v):
+        if pd.isna(v):
+            raise ValueError("Sample name not found in mapping file")
+        return v
+    
+    @field_validator("resistance_prediction", mode="before")
+    @classmethod
+    def validate_resistance_prediction(cls, v):
+        if v == "Complete":
+            return None
+        if not re.match(r"^[SRUF_]{4}\s[SRUF_]{2}\s[SRUF_]{2}$", v):
+            raise ValueError(f"Invalid drug resistance prediction {v}")
+        return v
+    
+    @model_validator(mode="before")
+    def split_species(self) -> Self:
+        if pd.notna(self['Main Species']):
+            split_species = self['Main Species'].split("_", 1)
+            self['species'] = split_species[0]
+            self['sub_species'] = split_species[1] if len(split_species) > 1 else None
+        else:
+            self['species'] = None
+            self['sub_species'] = None
+        return self

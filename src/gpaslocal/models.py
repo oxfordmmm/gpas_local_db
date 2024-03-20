@@ -273,6 +273,7 @@ class Analysis(GpasLocalModel):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     sample_id: Mapped[int] = mapped_column(ForeignKey("samples.id"))
+    batch_name: Mapped[str] = mapped_column(String(20))
     assay_system: Mapped[str] = mapped_column(String(20))
 
     sample: Mapped["Sample"] = relationship("Sample", back_populates="analyses")
@@ -293,8 +294,8 @@ class Speciation(GpasLocalModel):
     analysis_id: Mapped[int] = mapped_column(ForeignKey("analyses.id"))
     species_number: Mapped[int] = mapped_column()
     species: Mapped[str] = mapped_column(String(100))
-    sub_species: Mapped[str] = mapped_column(String(100))
-    analysis_date: Mapped[date] = mapped_column(default=datetime.utcnow)
+    sub_species: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    analysis_date: Mapped[Optional[date]] = mapped_column(default=datetime.utcnow, nullable=True)
     data: Mapped[Optional[dict | list]] = mapped_column(type_=JSON, nullable=True)
 
     analysis: Mapped["Analysis"] = relationship(

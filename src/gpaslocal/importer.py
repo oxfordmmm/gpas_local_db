@@ -1,7 +1,6 @@
 import pandas as pd  # type: ignore
 import gpaslocal.models as models
-from gpaslocal import __dbrevision__
-from gpaslocal.db import get_session
+from gpaslocal.db import get_session, db_revision_ok
 from gpaslocal.upload_models import (
     RunImport,
     SpecimensImport,
@@ -11,24 +10,11 @@ from gpaslocal.upload_models import (
 from pydantic import ValidationError
 from gpaslocal.logs import logger
 from sqlalchemy.orm import Session
-from sqlalchemy import not_, text
+from sqlalchemy import not_
 from sqlalchemy.exc import DBAPIError
 from progressbar import ProgressBar
 from datetime import date
 import re
-
-
-def db_revision_ok(session: Session) -> bool:
-    db_revision = session.execute(
-        text("SELECT MAX(version_num) FROM alembic_version")
-    ).scalar()
-    if db_revision != __dbrevision__:
-        logger.error(
-            f"Database revision {db_revision} does not match the expected revision {__dbrevision__}"
-        )
-        return False
-    return True
-
 
 def import_data(excel_wb: str, dryrun: bool = False) -> bool:
     logger.info(
