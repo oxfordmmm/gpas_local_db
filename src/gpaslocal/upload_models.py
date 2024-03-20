@@ -1,3 +1,4 @@
+import re
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -125,22 +126,32 @@ class GpasSummary(ImportModel):
     sample_name: Annotated[ExcelStr, Field(max_length=20)]
     batch: Annotated[ExcelStr, Field(max_length=20, alias="Batch")]
     main_species: Annotated[ExcelStr, Field(max_length=50, alias="Main Species")]
-    resistance_prediction: Annotated[ExcelStr, Field(max_length=50, alias="Resistance Prediction")]
+    resistance_prediction: Annotated[Optional[ExcelStr], Field(max_length=50, alias="Resistance Prediction")]
     species: Optional[str]
     sub_species: Optional[str]
     
     model_config = ConfigDict(extra="allow")
     
     @field_validator("sample_name", mode="before")
+    @classmethod
     def validate_sample_name(cls, v):
         if pd.isna(v):
             raise ValueError("Sample name not found in mapping file")
         return v
     
+    @field_validator("resistance_prediction", mode="before")
+    @classmethod
+    def validate_resistance_prediction(cls, v):
+        if v == "Complete":
+            return None
+        if not re.match(r"^[SRUF_]{4}\s[SRUF_]{2}\s[SRUF_]{2}$", v):
+            raise ValueError(f"Invalid drug resistance prediction {v}")
+        return v
+    
     @model_validator(mode="before")
     def split_species(self) -> Self:
         if pd.notna(self['Main Species']):
-            split_species = self['Main Species'].split(" ", 1)
+            split_species = self['Main Species'].split("_", 1)
             self['species'] = split_species[0]
             self['sub_species'] = split_species[1] if len(split_species) > 1 else None
         else:

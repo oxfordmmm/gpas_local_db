@@ -140,22 +140,30 @@ def speciation(session: Session, gpas_summary: GpasSummary, index: int, dryrun: 
     return speciation 
 
 def drugs(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool, analysis_record: models.Analysis):
-    if gpas_summary.resistance_prediction is None or gpas_summary.resistance_prediction == "Complete":
+    if gpas_summary.resistance_prediction is None:
         logger.info(
             f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} Empty"
         )
         return
     
-    # check we have the correct format for drug resistance prediction
-    if not re.match(r"^[SRUF_]{4}\s[SRUF_]{2}\s[SRUF_]{2}$", gpas_summary.resistance_prediction):
-        raise ValueError(f"Invalid drug resistance prediction {gpas_summary.resistance_prediction}")
-    
     for key, value in tb_drugs.items():
-        drug_resistance = models.DrugResistance(
-            analysis = analysis_record,
-            antibiotic = value,
-            drug_resistance_result_type_code = gpas_summary.resistance_prediction[key]
-        )
-        session.add(drug_resistance)
+        if drug_resistance := (
+            session.query(models.DrugResistance)
+            .filter(
+                models.DrugResistance.analysis == analysis_record,
+                models.DrugResistance.antibiotic == value
+            )
+            .first()
+        ):
+            logger.info(
+                f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} already exists{'' if dryrun else ', updating'}"
+            )
+        else:
+            drug_resistance = models.DrugResistance(
+                analysis = analysis_record,
+                antibiotic = value,
+            )
+            session.add(drug_resistance)
+        drug_resistance.drug_resistance_result_type_code = gpas_summary.resistance_prediction[key]
         
     logger.info(f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} added")
