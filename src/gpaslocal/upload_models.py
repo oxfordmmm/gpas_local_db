@@ -127,6 +127,7 @@ class GpasSummary(ImportModel):
     batch: Annotated[ExcelStr, Field(max_length=20, alias="Batch")]
     main_species: Annotated[ExcelStr, Field(max_length=50, alias="Main Species")]
     resistance_prediction: Annotated[Optional[ExcelStr], Field(max_length=50, alias="Resistance Prediction")]
+    run_date: Optional[date] = None
     species: Optional[str]
     sub_species: Optional[str]
     
