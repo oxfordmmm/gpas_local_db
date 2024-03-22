@@ -1,4 +1,4 @@
-import pandas as pd  # type: ignore
+import pandas as pd 
 import gpaslocal.models as models
 from gpaslocal.db import get_session, db_revision_ok
 from gpaslocal.upload_models import (

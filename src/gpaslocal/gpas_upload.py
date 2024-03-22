@@ -36,6 +36,8 @@ def import_summary(summary_csv: str, mapping_csv: str, dryrun: bool):
                     
                     drugs(session, gpas_summary, index, dryrun, analysis_record)
                     
+                    details(session, gpas_summary, index, dryrun, analysis_record)
+                    
                 except ValidationError as err:
                     for error in err.errors():
                         logger.error(
@@ -133,8 +135,7 @@ def speciation(session: Session, gpas_summary: GpasSummary, index: int, dryrun: 
         
     speciation.species = gpas_summary.species
     speciation.sub_species = gpas_summary.sub_species
-    
-    ## TODO - missing the analysis date value
+    speciation.analysis_date = gpas_summary.run_date
     
     return speciation 
 
@@ -155,7 +156,7 @@ def drugs(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool,
             .first()
         ):
             logger.info(
-                f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} already exists{'' if dryrun else ', updating'}"
+                f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name}, Antibiotic {value} already exists{'' if dryrun else ', updating'}"
             )
         else:
             drug_resistance = models.DrugResistance(
@@ -166,3 +167,32 @@ def drugs(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool,
         drug_resistance.drug_resistance_result_type_code = gpas_summary.resistance_prediction[key]
         
     logger.info(f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} added")
+    
+def details(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool, analysis_record: models.Analysis):
+    other_types = session.query(models.OtherType).all()
+    for other_type in other_types:
+        value = gpas_summary[other_type.code]
+        
+        other_record = (
+            session.query(models.Other)
+            .filter(
+                models.Other.analysis == analysis_record,
+                models.Other.other_type_code == other_type.code
+            )
+            .first()
+        )
+        
+        if value is None:
+            if other_record:
+                session.delete(other_record)
+            continue
+        
+        if not other_record:
+            other_record = models.Other(
+                analysis = analysis_record,
+                other_type_code = other_type.code
+            )
+            session.add(other_record)
+            
+        other_record["value_" + other_type.value_type] = value
+        
