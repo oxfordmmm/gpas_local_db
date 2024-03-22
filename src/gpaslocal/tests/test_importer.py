@@ -12,6 +12,7 @@ def test_some_database_interaction(db_session):
     result = db_session.execute(text("SELECT * FROM owners"))
     assert result.rowcount >= 0
 
+
 @pytest.mark.parametrize(
     "index, owner_site, owner_user, dryrun, expected_log, test_id",
     [
@@ -65,6 +66,7 @@ def test_owner(
     else:
         assert caplog.text == ""
 
+
 def test_find_run(db_session):
     # Arrange
     run_code = "Run1"
@@ -94,6 +96,7 @@ def test_find_run_not_found(db_session):
     with pytest.raises(ValueError):
         find_run(db_session, run_code)
 
+
 def test_find_specimen(db_session):
     # Arrange
     specimen_accession = "123test"
@@ -110,21 +113,22 @@ def test_find_specimen(db_session):
     assert result.created_at
     assert result.updated_at
 
+
 def test_find_specimen_not_found(db_session):
     # Arrange
     specimen_accession = "456test"
     specimen_collection_date = date.fromisoformat("2021-01-01")
-    
+
     with pytest.raises(ValueError):
         find_specimen(db_session, specimen_accession, specimen_collection_date)
+
 
 def test_runs_upload_ok_new(db_session, caplog):
     # Arrange
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    xl_ok = os.path.join(dir_path, 'data', 'test_no_errors.xlsm')
-    
+    xl_ok = os.path.join(dir_path, "data", "test_no_errors.xlsm")
+
     runs(db_session, xl_ok, dryrun=True)
-    
+
     assert "Sheet Row 2: Run test1 already exists" in caplog.text
     assert "Runs Sheet Row 3: Run test2 does not exist" in caplog.text
-    
