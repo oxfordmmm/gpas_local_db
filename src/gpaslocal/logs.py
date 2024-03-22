@@ -39,3 +39,4 @@ error_check_handler = ErrorCheckHandler(stream=sys.stderr)
 
 logger.addHandler(error_check_handler)
 logger.setLevel(logging.INFO)
+logger.propagate = True
