@@ -193,7 +193,9 @@ class Sample(GpasLocalModel):
 
     @nucleic_acid_type.setter  # type: ignore
     def nucleic_acid_type(self, value):
-        self._nucleic_acid_type = value if isinstance(value, list) else [] if value is None else list(value)
+        self._nucleic_acid_type = (
+            value if isinstance(value, list) else [] if value is None else list(value)
+        )
 
     run: Mapped["Run"] = relationship("Run", back_populates="samples")
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="samples")
@@ -295,7 +297,9 @@ class Speciation(GpasLocalModel):
     species_number: Mapped[int] = mapped_column()
     species: Mapped[str] = mapped_column(String(100))
     sub_species: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    analysis_date: Mapped[Optional[date]] = mapped_column(default=datetime.utcnow, nullable=True)
+    analysis_date: Mapped[Optional[date]] = mapped_column(
+        default=datetime.utcnow, nullable=True
+    )
     data: Mapped[Optional[dict | list]] = mapped_column(type_=JSON, nullable=True)
 
     analysis: Mapped["Analysis"] = relationship(
@@ -393,5 +397,6 @@ class Storage(GpasLocalModel):
     notes: Mapped[Text] = mapped_column(Text, nullable=True)
 
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="storages")
+
 
 configure_mappers()

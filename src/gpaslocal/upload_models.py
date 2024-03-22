@@ -10,15 +10,12 @@ from pydantic import (
 from datetime import date
 from iso3166 import countries
 import pandas as pd  # type: ignore
-from typing import List, Annotated, Optional
+from typing import List, Optional
 from gpaslocal.constants import ExcelStr
 from gpaslocal.constants import (
     SequencingMethod,
     SampleCategory,
     NucleicAcidType,
-    NoneOrNan,
-    ExcelDate,
-    OptionalExcelDate,
 )
 from typing_extensions import Self, Any
 
@@ -30,7 +27,7 @@ class ImportModel(BaseModel):
     def __setitem__(self, key, value):
         if key in self.__dict__:
             self.__dict__[key] = value
-            
+
     @model_validator(mode="before")
     @classmethod
     def convert_nan_to_none(cls, data: Any) -> Any:
@@ -50,7 +47,7 @@ class RunImport(ImportModel):
     flowcell: Optional[ExcelStr] = Field(None, max_length=20)
     passed_qc: Optional[bool] = None
     comment: Optional[ExcelStr] = None
-    
+
 
 class SpecimensImport(ImportModel):
     owner_site: ExcelStr = Field(max_length=50)
@@ -69,7 +66,7 @@ class SpecimensImport(ImportModel):
     lon: Optional[float] = None
 
     model_config = ConfigDict(extra="allow")
-    
+
     @field_validator("country_sample_taken_code")
     def validate_country_sample_taken_code(cls, v):
         if v not in countries:
@@ -85,7 +82,7 @@ class SamplesImport(ImportModel):
     sample_category: Optional[SampleCategory] = None
     nucleic_acid_type: Optional[List[NucleicAcidType]] = None
     dilution_post_initial_concentration: Optional[bool] = None
-    extraction_date: OptionalExcelDate[date] = None
+    extraction_date: Optional[date] = None
     extraction_method: Optional[ExcelStr] = Field(max_length=50)
     extraction_protocol: Optional[ExcelStr] = Field(max_length=50)
     extraction_user: Optional[ExcelStr] = Field(max_length=50)
@@ -127,12 +124,12 @@ class StoragesImport(ImportModel):
     storage_qr_code: ExcelStr
     date_into_storage: date
     notes: Optional[ExcelStr] = None
-    
+
 
 class GpasSummary(ImportModel):
     sample_name: str = Field(max_length=20)
     batch: str = Field(max_length=20, alias="Batch")
-    main_species: Optional[str]=  Field(None, max_length=50, alias="Main Species")
+    main_species: Optional[str] = Field(None, max_length=50, alias="Main Species")
     resistance_prediction: str = Field(max_length=50, alias="Resistance Prediction")
     run_date: Optional[date] = None
     species: Optional[str]
@@ -144,9 +141,9 @@ class GpasSummary(ImportModel):
     tb_reads: Optional[float] = Field(None, alias="TB Reads (M)")
     coverage: Optional[float] = Field(None, alias="Coverage")
     null_calls: Optional[int] = Field(None, alias="Null calls")
-    
+
     model_config = ConfigDict(extra="allow")
-    
+
     @field_validator("resistance_prediction", mode="after")
     @classmethod
     def validate_resistance_prediction(cls, v):
@@ -155,22 +152,21 @@ class GpasSummary(ImportModel):
         if not re.match(r"^[SRUF_]{4}\s[SRUF_]{2}\s[SRUF_]{2}$", v):
             raise ValueError(f"Invalid drug resistance prediction {v}")
         return v
-    
+
     @field_validator("sample_name", mode="before")
     @classmethod
     def validate_sample_name(cls, v):
         if pd.isna(v):
             raise ValueError("Sample name not found in mapping file")
         return v
-    
-    
+
     @model_validator(mode="before")
     def split_species(self) -> Self:
-        if pd.notna(self['Main Species']):
-            split_species = self['Main Species'].split("_", 1)
-            self['species'] = split_species[0]
-            self['sub_species'] = split_species[1] if len(split_species) > 1 else None
+        if pd.notna(self["Main Species"]):
+            split_species = self["Main Species"].split("_", 1)
+            self["species"] = split_species[0]
+            self["sub_species"] = split_species[1] if len(split_species) > 1 else None
         else:
-            self['species'] = None
-            self['sub_species'] = None
+            self["species"] = None
+            self["sub_species"] = None
         return self

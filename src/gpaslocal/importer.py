@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import gpaslocal.models as models
 from gpaslocal.db import get_session, db_revision_ok
 from gpaslocal.upload_models import (
@@ -15,6 +15,7 @@ from sqlalchemy.exc import DBAPIError
 from progressbar import ProgressBar
 from datetime import date
 import re
+
 
 def import_data(excel_wb: str, dryrun: bool = False) -> bool:
     logger.info(

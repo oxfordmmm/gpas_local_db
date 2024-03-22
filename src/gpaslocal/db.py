@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from gpaslocal import __dbrevision__
 from gpaslocal.logs import logger
 
+
 def db_revision_ok(session: Session) -> bool:
     db_revision = session.execute(
         text("SELECT MAX(version_num) FROM alembic_version")
@@ -16,6 +17,7 @@ def db_revision_ok(session: Session) -> bool:
         return False
     return True
 
+
 class Model(DeclarativeBase):
     metadata = MetaData(
         naming_convention={
@@ -26,6 +28,7 @@ class Model(DeclarativeBase):
             "pk": "pk_%(table_name)s",
         }
     )
+
 
 @contextmanager
 def get_session():
