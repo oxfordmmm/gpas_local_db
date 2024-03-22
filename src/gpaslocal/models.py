@@ -193,7 +193,9 @@ class Sample(GpasLocalModel):
 
     @nucleic_acid_type.setter  # type: ignore
     def nucleic_acid_type(self, value):
-        self._nucleic_acid_type = value if isinstance(value, list) else list(value)
+        self._nucleic_acid_type = (
+            value if isinstance(value, list) else [] if value is None else list(value)
+        )
 
     run: Mapped["Run"] = relationship("Run", back_populates="samples")
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="samples")
@@ -273,6 +275,7 @@ class Analysis(GpasLocalModel):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     sample_id: Mapped[int] = mapped_column(ForeignKey("samples.id"))
+    batch_name: Mapped[str] = mapped_column(String(20))
     assay_system: Mapped[str] = mapped_column(String(20))
 
     sample: Mapped["Sample"] = relationship("Sample", back_populates="analyses")
@@ -293,8 +296,10 @@ class Speciation(GpasLocalModel):
     analysis_id: Mapped[int] = mapped_column(ForeignKey("analyses.id"))
     species_number: Mapped[int] = mapped_column()
     species: Mapped[str] = mapped_column(String(100))
-    sub_species: Mapped[str] = mapped_column(String(100))
-    analysis_date: Mapped[date] = mapped_column(default=datetime.utcnow)
+    sub_species: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    analysis_date: Mapped[Optional[date]] = mapped_column(
+        default=datetime.utcnow, nullable=True
+    )
     data: Mapped[Optional[dict | list]] = mapped_column(type_=JSON, nullable=True)
 
     analysis: Mapped["Analysis"] = relationship(
@@ -379,13 +384,17 @@ class Storage(GpasLocalModel):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     specimen_id: Mapped[int] = mapped_column(ForeignKey("specimens.id"))
-    freezer_id: Mapped[str] = mapped_column(String(20))
-    freezer_compartment: Mapped[str] = mapped_column(String(20))
-    freezer_sub_compartment: Mapped[str] = mapped_column(String(20))
+    freezer: Mapped[str] = mapped_column(String(50))
+    shelf: Mapped[str] = mapped_column(String(50))
+    rack: Mapped[str] = mapped_column(String(50))
+    tray: Mapped[str] = mapped_column(String(50))
+    box: Mapped[str] = mapped_column(String(50))
+    box_location: Mapped[str] = mapped_column(String(50))
     storage_qr_code: Mapped[Text] = mapped_column(Text, nullable=False, unique=True)
     date_into_storage: Mapped[date] = mapped_column(
         default=datetime.utcnow, nullable=False
     )
+    notes: Mapped[Text] = mapped_column(Text, nullable=True)
 
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="storages")
 
