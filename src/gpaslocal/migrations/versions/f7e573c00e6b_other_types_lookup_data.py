@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f7e573c00e6b'
-down_revision: Union[str, None] = 'f01fce5ded1d'
+revision: str = "f7e573c00e6b"
+down_revision: Union[str, None] = "f01fce5ded1d"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -52,7 +52,7 @@ other_types_data = [
         "code": "null_calls",
         "description": "null calls",
         "value_type": "int",
-    }
+    },
 ]
 
 
@@ -72,9 +72,7 @@ def upgrade() -> None:
 def downgrade() -> None:
     for row in other_types_data:
         op.execute(
-            sa.text(
-                "DELETE FROM other_types WHERE code = :code"
-            ).bindparams(
+            sa.text("DELETE FROM other_types WHERE code = :code").bindparams(
                 code=row["code"],
             )
         )

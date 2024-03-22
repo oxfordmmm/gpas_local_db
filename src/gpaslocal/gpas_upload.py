@@ -1,7 +1,7 @@
 from gpaslocal.logs import logger
 from gpaslocal.db import get_session
 from gpaslocal.db import db_revision_ok
-import pandas as pd # type: ignore
+import pandas as pd  # type: ignore
 from progressbar import ProgressBar
 from gpaslocal import models
 from gpaslocal.upload_models import GpasSummary
@@ -10,34 +10,35 @@ from sqlalchemy.orm import Session
 from pydantic import ValidationError
 from gpaslocal.constants import tb_drugs
 
+
 def import_summary(summary_csv: str, mapping_csv: str, dryrun: bool):
     """Upload data from a summary csv"""
-    logger.info(
-        f"Verifying and uploading data to database from Summary {summary_csv}"
-    )
+    logger.info(f"Verifying and uploading data to database from Summary {summary_csv}")
     with get_session() as session:
         try:
             if not db_revision_ok(session):
                 return False
-            
+
             df_sum = pd.read_csv(summary_csv)
             df_map = pd.read_csv(mapping_csv)
-            
-            df_merged = df_sum.merge(df_map, left_on="Sample ID", right_on="remote_sample_name", how="left")
+
+            df_merged = df_sum.merge(
+                df_map, left_on="Sample ID", right_on="remote_sample_name", how="left"
+            )
             pbar = ProgressBar(max_value=len(df_merged))
-            
+
             for index, row in pbar(df_merged.iterrows()):
                 try:
                     gpas_summary = GpasSummary(**row)
-                    
+
                     analysis_record = analysis(session, gpas_summary, index, dryrun)
-                    
+
                     speciation(session, gpas_summary, index, dryrun, analysis_record)
-                    
+
                     drugs(session, gpas_summary, index, dryrun, analysis_record)
-                    
+
                     details(session, gpas_summary, index, dryrun, analysis_record)
-                    
+
                 except ValidationError as err:
                     for error in err.errors():
                         logger.error(
@@ -45,12 +46,12 @@ def import_summary(summary_csv: str, mapping_csv: str, dryrun: bool):
                         )
                 except DBAPIError as err:
                     logger.error(f"Summary Row {index+2} : {err}")
-                    
+
                 except ValueError as err:
                     logger.error(f"Summary Row {index+2} : {err}")
-                
+
         except Exception as e:
-            logger.error(f"Failed to upload data: {e}") 
+            logger.error(f"Failed to upload data: {e}")
 
         if logger.error_occurred:  # type: ignore
             session.rollback()
@@ -66,25 +67,25 @@ def import_summary(summary_csv: str, mapping_csv: str, dryrun: bool):
 
     return True
 
+
 def find_sample(session: Session, guid: str) -> models.Sample:
     if sample := (
-        session.query(models.Sample)
-        .filter(
-            models.Sample.guid == guid
-        )
-        .first()
+        session.query(models.Sample).filter(models.Sample.guid == guid).first()
     ):
         return sample
     else:
         raise ValueError(f"Sample {guid} does not exist")
-    
-def analysis(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool) -> models.Analysis:
+
+
+def analysis(
+    session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool
+) -> models.Analysis:
     sample = find_sample(session, gpas_summary.sample_name)
     if analysis := (
         session.query(models.Analysis)
         .filter(
             models.Analysis.sample == sample,
-            models.Analysis.batch_name == gpas_summary.batch
+            models.Analysis.batch_name == gpas_summary.batch,
         )
         .first()
     ):
@@ -94,29 +95,34 @@ def analysis(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bo
         )
     else:
         analysis = models.Analysis(
-            sample=sample,
-            batch_name=gpas_summary.batch,
-            assay_system="GPAS TB"
+            sample=sample, batch_name=gpas_summary.batch, assay_system="GPAS TB"
         )
         session.add(analysis)
         logger.info(
             f"Summary row {index+2}: Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} does not exist{'' if dryrun else ', adding'}"
         )
-    
+
     return analysis
 
-def speciation(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool, analysis_record: models.Analysis) -> models.Speciation | None:
+
+def speciation(
+    session: Session,
+    gpas_summary: GpasSummary,
+    index: int,
+    dryrun: bool,
+    analysis_record: models.Analysis,
+) -> models.Speciation | None:
     if gpas_summary.species is None:
         logger.info(
             f"Summary row {index+2}: Speciation for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} not found"
         )
         return None
-    
+
     if speciation := (
         session.query(models.Speciation)
         .filter(
             models.Speciation.analysis == analysis_record,
-            models.Speciation.species_number == 1
+            models.Speciation.species_number == 1,
         )
         .first()
     ):
@@ -124,34 +130,38 @@ def speciation(session: Session, gpas_summary: GpasSummary, index: int, dryrun: 
             f"Summary row {index+2}: Speciation for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} already exists{'' if dryrun else ', updating'}"
         )
     else:
-        speciation = models.Speciation(
-            analysis = analysis_record,
-            species_number = 1
-        )
+        speciation = models.Speciation(analysis=analysis_record, species_number=1)
         session.add(speciation)
         logger.info(
             f"Summary row {index+2}: Speciation for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} does not exist{'' if dryrun else ', adding'}"
         )
-        
+
     speciation.species = gpas_summary.species
     speciation.sub_species = gpas_summary.sub_species
     speciation.analysis_date = gpas_summary.run_date
-    
-    return speciation 
 
-def drugs(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool, analysis_record: models.Analysis):
+    return speciation
+
+
+def drugs(
+    session: Session,
+    gpas_summary: GpasSummary,
+    index: int,
+    dryrun: bool,
+    analysis_record: models.Analysis,
+):
     if gpas_summary.resistance_prediction is None:
         logger.info(
             f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} Empty"
         )
         return
-    
+
     for key, value in tb_drugs.items():
         if drug_resistance := (
             session.query(models.DrugResistance)
             .filter(
                 models.DrugResistance.analysis == analysis_record,
-                models.DrugResistance.antibiotic == value
+                models.DrugResistance.antibiotic == value,
             )
             .first()
         ):
@@ -160,39 +170,48 @@ def drugs(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool,
             )
         else:
             drug_resistance = models.DrugResistance(
-                analysis = analysis_record,
-                antibiotic = value,
+                analysis=analysis_record,
+                antibiotic=value,
             )
             session.add(drug_resistance)
-        drug_resistance.drug_resistance_result_type_code = gpas_summary.resistance_prediction[key]
-        
-    logger.info(f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} added")
-    
-def details(session: Session, gpas_summary: GpasSummary, index: int, dryrun: bool, analysis_record: models.Analysis):
+        drug_resistance.drug_resistance_result_type_code = (
+            gpas_summary.resistance_prediction[key]
+        )
+
+    logger.info(
+        f"Summary row {index+2}: Drug Resistance for Batch {gpas_summary.batch}, Sample {gpas_summary.sample_name} added"
+    )
+
+
+def details(
+    session: Session,
+    gpas_summary: GpasSummary,
+    index: int,
+    dryrun: bool,
+    analysis_record: models.Analysis,
+):
     other_types = session.query(models.OtherType).all()
     for other_type in other_types:
         value = gpas_summary[other_type.code]
-        
+
         other_record = (
             session.query(models.Other)
             .filter(
                 models.Other.analysis == analysis_record,
-                models.Other.other_type_code == other_type.code
+                models.Other.other_type_code == other_type.code,
             )
             .first()
         )
-        
+
         if value is None:
             if other_record:
                 session.delete(other_record)
             continue
-        
+
         if not other_record:
             other_record = models.Other(
-                analysis = analysis_record,
-                other_type_code = other_type.code
+                analysis=analysis_record, other_type_code=other_type.code
             )
             session.add(other_record)
-            
+
         other_record["value_" + other_type.value_type] = value
-        

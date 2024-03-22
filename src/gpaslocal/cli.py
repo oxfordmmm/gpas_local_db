@@ -52,6 +52,7 @@ def upload(excel_sheet: str, dryrun: bool):
         logger.info("Dry run mode, no data will be uploaded")
     import_data(excel_sheet, dryrun=dryrun)
 
+
 @cli.command()
 @click.argument("summary_csv", type=click.Path(exists=True))
 @click.argument("mapping_csv", type=click.Path(exists=True))
@@ -61,6 +62,7 @@ def summary(summary_csv: str, mapping_csv: str, dryrun: bool):
     if dryrun:
         logger.info("Dry run mode, no data will be uploaded")
     import_summary(summary_csv, mapping_csv, dryrun=dryrun)
+
 
 if __name__ == "__main__":
     cli()
