@@ -194,7 +194,7 @@ The CLI program also allows for the upload of a `summary.csv`, output from the G
 gpaslocal summary summary.csv mapping.csv --dryrun
 ```
 
-Replacing `summary.csv` and `mapping.csv` with the name and location of your `summary.csv` and `mapping.csv` respectively.
+Replacing gpaslocal with the name of you executable, `summary.csv` and `mapping.csv` with the name and location of your `summary.csv` and `mapping.csv` respectively.
 
 ### Tests for uploading the summary.csv
 
