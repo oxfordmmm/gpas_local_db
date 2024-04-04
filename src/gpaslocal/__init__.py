@@ -1,2 +1,2 @@
 __version__ = "0.0.1"
-__dbrevision__: str = "f7e573c00e6b"
+__dbrevision__: str = "5fb8a9b2fea7"
