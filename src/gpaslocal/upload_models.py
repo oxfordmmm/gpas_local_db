@@ -163,10 +163,33 @@ class GpasSummary(ImportModel):
     @model_validator(mode="before")
     def split_species(self) -> Self:
         if pd.notna(self["Main Species"]):
-            split_species = self["Main Species"].split("_", 1)
-            self["species"] = split_species[0]
-            self["sub_species"] = split_species[1] if len(split_species) > 1 else None
+            if "_" in self["Main Species"]:
+                split_species = self["Main Species"].split("_", 1)
+                self["species"] = split_species[0]
+                self["sub_species"] = (
+                    split_species[1] if len(split_species) > 1 else None
+                )
+            else:
+                match = re.search(r"(.*)\s(\(.*?\))", self["Main Species"])
+                self["species"] = match.group(1) if match else self["Main Species"]
+                self["sub_species"] = match.group(2) if match else None
         else:
             self["species"] = None
             self["sub_species"] = None
         return self
+
+
+class Mutations(ImportModel):
+    sample_name: str = Field(max_length=20)
+    batch: str = Field(max_length=20, alias="Batch")
+    species: str = Field(max_length=100, alias="Species")
+    drug: str = Field(max_length=50, alias="Drug")
+    gene: str = Field(max_length=50, alias="Gene")
+    mutation: str = Field(max_length=50, alias="Mutation")
+    position: int = Field(alias="Position")
+    ref: str = Field(max_length=50, alias="Ref")
+    alt: str = Field(max_length=50, alias="Alt")
+    coverage: str = Field(max_length=50, alias="Coverage")
+    prediction: str = Field(max_length=50, alias="Prediction")
+    evidence: str = Field(alias="Evidence")
+    evidence_json: Optional[str] = Field(None, alias="Evidence JSON")

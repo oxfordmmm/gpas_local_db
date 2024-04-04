@@ -4,7 +4,7 @@ import click_log  # type: ignore
 from gpaslocal.config import config
 from gpaslocal.importer import import_data
 from gpaslocal.logs import logger
-from gpaslocal.gpas_upload import import_summary
+from gpaslocal.gpas_upload import import_summary, import_mutation
 
 
 def verify_configuration():
@@ -62,6 +62,17 @@ def summary(summary_csv: str, mapping_csv: str, dryrun: bool):
     if dryrun:
         logger.info("Dry run mode, no data will be uploaded")
     import_summary(summary_csv, mapping_csv, dryrun=dryrun)
+
+
+@cli.command()
+@click.argument("mutation_csv", type=click.Path(exists=True))
+@click.argument("mapping_csv", type=click.Path(exists=True))
+@click.option("--dryrun", is_flag=True)
+def mutation(mutation_csv: str, mapping_csv: str, dryrun: bool):
+    """Upload data from a mutation csv"""
+    if dryrun:
+        logger.info("Dry run mode, no data will be uploaded")
+    import_mutation(mutation_csv, mapping_csv, dryrun=dryrun)
 
 
 if __name__ == "__main__":

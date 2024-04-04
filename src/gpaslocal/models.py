@@ -111,6 +111,8 @@ class SpecimenDetail(GpasLocalModel):
         "SpecimenDetailType", back_populates="details"
     )
 
+    UniqueConstraint(specimen_id, specimen_detail_type_code)
+
 
 class SpecimenDetailType(GpasLocalModel):
     __versioned__: Dict = {}
@@ -236,6 +238,8 @@ class SampleDetail(GpasLocalModel):
         "SampleDetailType", back_populates="details"
     )
 
+    UniqueConstraint(sample_id, sample_detail_type_code)
+
 
 class SampleDetailType(GpasLocalModel):
     __versioned__: Dict = {}
@@ -268,6 +272,8 @@ class Spike(GpasLocalModel):
 
     sample: Mapped["Sample"] = relationship("Sample", back_populates="spikes")
 
+    UniqueConstraint(sample_id, name)
+
 
 class Analysis(GpasLocalModel):
     __versioned__: Dict = {}
@@ -286,6 +292,11 @@ class Analysis(GpasLocalModel):
     drug_resistances: Mapped[list["DrugResistance"]] = relationship(
         "DrugResistance", back_populates="analysis"
     )
+    mutations: Mapped[list["Mutations"]] = relationship(
+        "Mutations", back_populates="analysis"
+    )
+
+    UniqueConstraint(sample_id, batch_name)
 
 
 class Speciation(GpasLocalModel):
@@ -325,6 +336,8 @@ class Other(GpasLocalModel):
 
     analysis: Mapped["Analysis"] = relationship("Analysis", back_populates="others")
     other_type: Mapped["OtherType"] = relationship("OtherType", back_populates="others")
+
+    UniqueConstraint(analysis_id, other_type_code)
 
 
 class OtherType(GpasLocalModel):
@@ -397,6 +410,29 @@ class Storage(GpasLocalModel):
     notes: Mapped[Text] = mapped_column(Text, nullable=True)
 
     specimen: Mapped["Specimen"] = relationship("Specimen", back_populates="storages")
+
+
+class Mutations(GpasLocalModel):
+    __versioned__: Dict = {}
+    __tablename__ = "mutations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    analysis_id: Mapped[int] = mapped_column(ForeignKey("analyses.id"))
+    species: Mapped[str] = mapped_column(String(100))
+    drug: Mapped[str] = mapped_column(String(50))
+    gene: Mapped[str] = mapped_column(String(50))
+    mutation: Mapped[str] = mapped_column(String(50))
+    position: Mapped[int] = mapped_column()
+    ref: Mapped[str] = mapped_column(String(50))
+    alt: Mapped[str] = mapped_column(String(50))
+    coverage: Mapped[str] = mapped_column(String(50))
+    prediction: Mapped[str] = mapped_column(String(50))
+    evidence: Mapped[str] = mapped_column(String(255))
+    evidence_json: Mapped[Text] = mapped_column(Text, nullable=True)
+
+    analysis: Mapped["Analysis"] = relationship("Analysis", back_populates="mutations")
+
+    UniqueConstraint(analysis_id, species, drug, gene, mutation)
 
 
 configure_mappers()
