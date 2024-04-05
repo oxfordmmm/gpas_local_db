@@ -206,3 +206,15 @@ With the `--dryrun` flag enabled
 - [ ] Try removing the `Batch` from one of the rows in the `summary,csv`, you should get an error.
 
 Try rerunning the above test without the `--dryrun` flag.
+
+### Tests for uploading the mutation.csv
+
+With the `--dryrun` flag enabled
+
+- [ ] Try uploading a `mutation.csv` where all the samples are in the database. You should get a clean upload.
+- [ ] Try removing a row from the `mapping.csv`, you should get an error.
+- [ ] Try removing the `Sample ID` from one of the rows in the `mutation.csv`, you should get an error
+- [ ] Try removing the `Batch` from one of the rows in the `mutation.csv`, you should get an error.
+- [ ] The removing other fields from rows in the `mutation.csv`, you should get an error for everything except `Evidence JSON`".
+
+Try rerunning the above tests without the `--dryrun` flag.
