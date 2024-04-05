@@ -66,7 +66,19 @@ To upload the `summary.csv` use the following command
 ./gpaslocal-v0.0.15-macOS-arm64 summary <summary.csv> <mapping.csv> --dryrun
 ```
 
-Replacing `gpaslocal-v0.0.15-macOS-arm64` with the name of your execuatable, `<summary.csv>` with the name and location of you `summary.csv` and `<mapping.csv>` with the name and location of your mapping.csv. The`--dryrun` flag means that the data will not be applied to the database. If you get no errors then you can remove the `--dryrun` flag to apply the data to the database.
+Replacing `gpaslocal-v0.0.15-macOS-arm64` with the name of your executable, `<summary.csv>` with the name and location of you `summary.csv` and `<mapping.csv>` with the name and location of your mapping.csv. The`--dryrun` flag means that the data will not be applied to the database. If you get no errors then you can remove the `--dryrun` flag to apply the data to the database.
+
+### Uploading the GPAS mutation.csv
+
+As with the `summary.csv` you will need both the `mutation.csv` and the `mapping.csv`. Again you will have the restriction of only being able to import one batch of mutations at a time.
+
+To upload the `mutation.csv` use the following command
+
+```bash
+./gpaslocal-v0.0.15-macOS-arm64 mutation <mutation.csv> <mapping.csv> --dryrun
+```
+
+Replacing `gpaslocal-v0.0.15-macOS-arm64` with the name of your executable, `<mutation.csv>` with the name and location of you `mutation.csv` and `<mapping.csv>` with the name and location of your mapping.csv. The`--dryrun` flag means that the data will not be applied to the database. If you get no errors then you can remove the `--dryrun` flag to apply the data to the database.
 
 ## Running in development mode
 
