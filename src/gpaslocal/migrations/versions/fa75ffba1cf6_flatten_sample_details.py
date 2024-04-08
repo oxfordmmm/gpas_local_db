@@ -25,7 +25,7 @@ def upgrade() -> None:
     DECLARE
         type_record record;
         -- can not use replace view here as it complains about columns being dropped
-        sql_start TEXT := 'DROP VIEW IF EXISTS flattened_sample_details_view; CREATE VIEW flattened_sample_details_view AS SELECT s.id';
+        sql_start TEXT := 'DROP VIEW IF EXISTS flattened_sample_details_view; CREATE VIEW flattened_sample_details_view AS SELECT s.id as sample_id';
         sql_columns TEXT := '';
         sql_joins TEXT := ' FROM samples s';
         column_alias TEXT;
