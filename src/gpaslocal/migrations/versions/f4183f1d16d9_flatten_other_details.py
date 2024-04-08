@@ -8,18 +8,18 @@ Create Date: 2024-04-08 15:38:19.812632
 from typing import Sequence, Union
 
 from alembic import op
-import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f4183f1d16d9'
-down_revision: Union[str, None] = '74f145bf0bdc'
+revision: str = "f4183f1d16d9"
+down_revision: Union[str, None] = "74f145bf0bdc"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute("""
+    op.execute(
+        """
     CREATE OR REPLACE FUNCTION create_flattened_others_view()
     RETURNS void AS $$
     DECLARE
@@ -47,11 +47,13 @@ def upgrade() -> None:
         EXECUTE sql_start || sql_columns || sql_joins;
     END;
     $$ LANGUAGE plpgsql;
-    """)
+    """
+    )
     # create the view for the first time
     op.execute("SELECT create_flattened_others_view();")
     # create a function that returns a trigger to update the view
-    op.execute("""
+    op.execute(
+        """
     CREATE OR REPLACE FUNCTION update_flattened_others_view()
     RETURNS TRIGGER AS $$
     BEGIN
@@ -59,20 +61,25 @@ def upgrade() -> None:
         RETURN NULL;
     END;
     $$ language 'plpgsql';
-    """)
+    """
+    )
     # create a trigger to update the view when a sample is inserted or updated or deleted
-    op.execute("""
+    op.execute(
+        """
     CREATE TRIGGER update_flattened_others_view_trigger
     AFTER INSERT OR UPDATE OR DELETE ON other_types
     FOR EACH STATEMENT
     EXECUTE FUNCTION update_flattened_others_view();
-    """)
+    """
+    )
 
 
 def downgrade() -> None:
-    op.execute("""
+    op.execute(
+        """
     DROP TRIGGER update_flattened_others_view_trigger ON samples;
     DROP FUNCTION update_flattened_others_view();
     DROP VIEW flattened_others_view;
     DROP FUNCTION create_flattened_others_view();
-    """)
+    """
+    )
