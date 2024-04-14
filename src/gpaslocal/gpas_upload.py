@@ -319,6 +319,6 @@ def mutation(
     mut.coverage = mutation.coverage
     mut.prediction = mutation.prediction
     mut.evidence = mutation.evidence
-    mut.evidence_json = mutation.evidence_json # type: ignore
+    mut.evidence_json = mutation.evidence_json  # type: ignore
 
     return mut

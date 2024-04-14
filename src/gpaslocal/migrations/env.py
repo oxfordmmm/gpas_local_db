@@ -24,8 +24,20 @@ if config.config_file_name is not None:
 # target_metadata = mymodel.Base.metadata
 target_metadata = Model.metadata
 
-# to keep mypy quiet do an assert
 config.set_main_option("sqlalchemy.url", app_config.DATABASE_URL)
+
+ignored_views = [
+    "alembic_version",
+    "flattened_sample_details_view",
+    "flattened_specimen_details_view",
+    "flattened_others_view",
+]
+
+
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and name in ignored_views:
+        return False
+    return True
 
 
 def run_migrations_offline() -> None:
@@ -46,6 +58,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -66,6 +79,7 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             render_as_batch=True,
+            include_object=include_object,
         )
 
         with context.begin_transaction():
